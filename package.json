@@ -1,0 +1,33 @@
+{
+  "name": "tutor-matching-platform-fe",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ant-design/cssinjs": "^1.21.0",
+    "@ant-design/icons": "^5.4.0",
+    "@tanstack/react-query": "^5.51.0",
+    "antd": "^5.21.0",
+    "axios": "^1.7.2",
+    "dayjs": "^1.11.12",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.0",
+    "zustand": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/parser": "^8.65.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "eslint": "^10.8.0",
+    "typescript": "^5.5.3",
+    "vite": "^5.4.0"
+  }
+}
