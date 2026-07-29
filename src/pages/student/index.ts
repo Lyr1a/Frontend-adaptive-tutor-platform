@@ -1,0 +1,9 @@
+export { default as StudentDashboard } from './Dashboard';
+export { default as SearchTutors } from './SearchTutors';
+export { default as TutorProfile } from './TutorProfile';
+export { default as BookSession } from './BookSession';
+export { default as StudentSessions } from './Sessions';
+export { default as SessionDetail } from './SessionDetail';
+export { default as Wallet } from './Wallet';
+export { default as Progress } from './Progress';
+export { default as Profile } from './Profile';
