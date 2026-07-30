@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Tabs, Typography, Row, Col, Empty, Skeleton, Modal, Form, Input, Select, message, Tag, Avatar } from 'antd';
+import { Card, Tabs, Typography, Row, Col, Empty, Skeleton, Modal, Form, Input, Select, message, Tag, Avatar, Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { sessionService } from '../../services';
 import { StatusBadge } from '../../components/common';
 import type { Session, SessionChangeType } from '../../types';
 import { getDateRange } from '../../utils';
 import { TeamOutlined, CalendarOutlined, VideoCameraOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -34,7 +35,7 @@ const TutorSessions: React.FC = () => {
       setSessions(data);
     } catch (error) {
       console.error('Failed to fetch sessions:', error);
-      message.error('Không thể tải danh sách buổi dạy');
+      message.error('Unable to load teaching sessions');
     } finally {
       setLoading(false);
     }
@@ -55,21 +56,21 @@ const TutorSessions: React.FC = () => {
 
   const handleCancel = async (sessionId: number) => {
     Modal.confirm({
-      title: 'Hủy buổi dạy',
-      content: 'Bạn có chắc muốn hủy buổi dạy này?',
-      okText: 'Hủy buổi dạy',
+      title: 'Cancel Teaching Session',
+      content: 'Are you sure you want to cancel this teaching session?',
+      okText: 'Cancel Teaching Session',
       okButtonProps: { danger: true },
-      cancelText: 'Không',
+      cancelText: 'No',
       async onOk() {
         try {
           await sessionService.proposeChange(sessionId, {
             changeType: 'Cancel',
             reason: 'Tutor requested cancellation',
           });
-          message.success('Yêu cầu hủy đã được gửi');
+          message.success('Cancellation request submitted');
           fetchSessions();
         } catch (error) {
-          message.error('Không thể hủy buổi dạy');
+          message.error('Unable to cancel the teaching session');
         }
       },
     });
@@ -80,18 +81,29 @@ const TutorSessions: React.FC = () => {
 
     setSubmitting(true);
     try {
+      const durationMinutes = dayjs(selectedSession.endTime).diff(
+        dayjs(selectedSession.startTime),
+        'minute'
+      );
+      const newStartTime = values.newStartTime
+        ? dayjs(values.newStartTime).toISOString()
+        : undefined;
+      const newEndTime = values.newStartTime
+        ? dayjs(values.newStartTime).add(durationMinutes, 'minute').toISOString()
+        : undefined;
+
       await sessionService.proposeChange(selectedSession.id, {
         changeType,
         reason: values.reason,
-        newStartTime: changeType === 'Reschedule' ? values.newStartTime : undefined,
-        newEndTime: changeType === 'Reschedule' ? values.newEndTime : undefined,
+        newStartTime: changeType === 'Reschedule' ? newStartTime : undefined,
+        newEndTime: changeType === 'Reschedule' ? newEndTime : undefined,
       });
-      message.success('Yêu cầu đã được gửi thành công');
+      message.success('Request submitted successfully');
       setModalVisible(false);
       form.resetFields();
       fetchSessions();
     } catch (error) {
-      message.error('Không thể gửi yêu cầu');
+      message.error('Unable to submit the request');
     } finally {
       setSubmitting(false);
     }
@@ -128,85 +140,46 @@ const TutorSessions: React.FC = () => {
       {session.meetingLink && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
           <VideoCameraOutlined style={{ color: '#686b82' }} />
-          <Text style={{ color: '#7132f5' }}>Có link học trực tuyến</Text>
+          <Text style={{ color: '#7132f5' }}>Online meeting link available</Text>
         </div>
       )}
 
       {session.score !== undefined && session.score !== null && (
         <div style={{ marginBottom: 12 }}>
-          <Text type="secondary">Điểm số: </Text>
+          <Text type="secondary">Score: </Text>
           <Text strong>{session.score}/10</Text>
         </div>
       )}
 
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <button
+        <Button
+          type="primary"
           onClick={() => navigate(`/tutor/session/${session.id}`)}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#7132f5',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 10,
-            fontSize: 13,
-            fontWeight: 500,
-            cursor: 'pointer',
-          }}
         >
-          Chi tiết
-        </button>
+          Details
+        </Button>
 
-        {session.meetingLink && (session.status === 'Confirmed' || session.status === 'Pending') && (
+        {session.meetingLink && session.canJoin && (
           <a href={session.meetingLink} target="_blank" rel="noopener noreferrer">
-            <button
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#149e61',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 10,
-                fontSize: 13,
-                fontWeight: 500,
-                cursor: 'pointer',
-              }}
-            >
-              Tham gia
-            </button>
+            <Button type="primary" style={{ backgroundColor: '#149e61' }}>
+              Join
+            </Button>
           </a>
         )}
 
-        {(session.status === 'Confirmed' || session.status === 'Pending') && (
+        {session.status === 'Confirmed' && (
           <>
-            <button
+            <Button
               onClick={() => handleProposeChange(session.id)}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: 'rgba(148, 151, 169, 0.08)',
-                color: '#101114',
-                border: 'none',
-                borderRadius: 10,
-                fontSize: 13,
-                fontWeight: 500,
-                cursor: 'pointer',
-              }}
             >
-              Đổi lịch
-            </button>
-            <button
+              Reschedule
+            </Button>
+            <Button
+              danger
               onClick={() => handleCancel(session.id)}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: 'rgba(220, 38, 38, 0.08)',
-                color: '#dc2626',
-                border: 'none',
-                borderRadius: 10,
-                fontSize: 13,
-                fontWeight: 500,
-                cursor: 'pointer',
-              }}
             >
-              Hủy
-            </button>
+              Cancel
+            </Button>
           </>
         )}
       </div>
@@ -244,23 +217,23 @@ const TutorSessions: React.FC = () => {
   const tabItems = [
     {
       key: 'upcoming',
-      label: `Sắp tới (${upcomingSessions.length})`,
-      children: renderSessionsList(upcomingSessions, 'Không có buổi dạy nào sắp tới'),
+      label: `Upcoming (${upcomingSessions.length})`,
+      children: renderSessionsList(upcomingSessions, 'No upcoming teaching sessions'),
     },
     {
       key: 'completed',
-      label: `Hoàn thành (${completedSessions.length})`,
-      children: renderSessionsList(completedSessions, 'Chưa có buổi dạy hoàn thành'),
+      label: `Completed (${completedSessions.length})`,
+      children: renderSessionsList(completedSessions, 'No completed teaching sessions yet'),
     },
     {
       key: 'cancelled',
-      label: `Đã hủy (${cancelledSessions.length})`,
-      children: renderSessionsList(cancelledSessions, 'Không có buổi dạy bị hủy'),
+      label: `Cancelled (${cancelledSessions.length})`,
+      children: renderSessionsList(cancelledSessions, 'No cancelled teaching sessions'),
     },
     {
       key: 'pending',
-      label: `Chờ đổi lịch (${pendingChangeSessions.length})`,
-      children: renderSessionsList(pendingChangeSessions, 'Không có yêu cầu đổi lịch'),
+      label: `Awaiting Reschedule (${pendingChangeSessions.length})`,
+      children: renderSessionsList(pendingChangeSessions, 'No reschedule requests'),
     },
   ];
 
@@ -268,9 +241,9 @@ const TutorSessions: React.FC = () => {
     <div>
       <div style={{ marginBottom: 24 }}>
         <Title level={2} style={{ margin: 0, fontWeight: 700, color: '#101114' }}>
-          Lịch dạy của tôi
+          My Teaching Sessions
         </Title>
-        <Text type="secondary">Quản lý các buổi dạy của bạn</Text>
+        <Text type="secondary">Manage your teaching sessions</Text>
       </div>
 
       <Card 
@@ -286,7 +259,7 @@ const TutorSessions: React.FC = () => {
 
       {/* Change Request Modal */}
       <Modal
-        title="Đề xuất thay đổi lịch"
+        title="Request a Schedule Change"
         open={modalVisible}
         onCancel={() => {
           setModalVisible(false);
@@ -299,68 +272,52 @@ const TutorSessions: React.FC = () => {
           layout="vertical"
           onFinish={handleSubmitChange}
         >
-          <Form.Item label="Loại thay đổi">
+          <Form.Item label="Change Type">
             <Select
               value={changeType}
               onChange={setChangeType}
               size="large"
             >
-              <Option value="Reschedule">Đổi lịch</Option>
-              <Option value="Cancel">Hủy buổi dạy</Option>
+              <Option value="Reschedule">Reschedule</Option>
+              <Option value="Cancel">Cancel Teaching Session</Option>
             </Select>
           </Form.Item>
 
           {changeType === 'Reschedule' && (
             <Form.Item
-              label="Ngày/giờ mới"
+              label="New Date and Time"
               name="newStartTime"
-              rules={[{ required: true, message: 'Vui lòng chọn thời gian mới!' }]}
+              rules={[{ required: true, message: 'Please select a new date and time!' }]}
             >
               <Input type="datetime-local" size="large" />
             </Form.Item>
           )}
 
           <Form.Item
-            label="Lý do"
+            label="Reason"
             name="reason"
-            rules={[{ required: true, message: 'Vui lòng nhập lý do!' }]}
+            rules={[{ required: true, message: 'Please enter a reason!' }]}
           >
-            <TextArea rows={3} placeholder="Nhập lý do thay đổi lịch..." />
+            <TextArea rows={3} placeholder="Enter a reason for the schedule change..." />
           </Form.Item>
 
           <Form.Item style={{ marginBottom: 0 }}>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-              <button
-                type="button"
+              <Button
                 onClick={() => {
                   setModalVisible(false);
                   form.resetFields();
                 }}
-                style={{
-                  padding: '8px 24px',
-                  borderRadius: 10,
-                  border: '1px solid #dedee5',
-                  backgroundColor: '#fff',
-                  cursor: 'pointer',
-                }}
               >
-                Hủy
-              </button>
-              <button
-                type="submit"
-                disabled={submitting}
-                style={{
-                  padding: '8px 24px',
-                  borderRadius: 10,
-                  border: 'none',
-                  backgroundColor: '#7132f5',
-                  color: '#fff',
-                  cursor: submitting ? 'not-allowed' : 'pointer',
-                  opacity: submitting ? 0.7 : 1,
-                }}
+                Cancel
+              </Button>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={submitting}
               >
-                {submitting ? 'Đang gửi...' : 'Gửi yêu cầu'}
-              </button>
+                Submit request
+              </Button>
             </div>
           </Form.Item>
         </Form>
