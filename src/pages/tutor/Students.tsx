@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Typography, Row, Col, Avatar, Empty, List, Tag, Rate } from 'antd';
-import { TeamOutlined, MailOutlined } from '@ant-design/icons';
+import { TeamOutlined } from '@ant-design/icons';
 import { sessionService } from '../../services';
 import { Loading } from '../../components/common';
 import type { Session } from '../../types';
@@ -12,11 +12,11 @@ interface Student {
   id: number;
   name: string;
   avatar?: string;
-  email: string;
   sessionCount: number;
   lastSession?: string;
   subjects: string[];
   averageScore?: number;
+  scores: number[];
 }
 
 const Students: React.FC = () => {
@@ -48,20 +48,21 @@ const Students: React.FC = () => {
               existing.lastSession = session.startTime;
             }
             if (session.score !== undefined && session.score !== null) {
-              existing.averageScore = existing.averageScore 
-                ? (existing.averageScore + session.score) / 2
-                : session.score;
+              existing.scores.push(session.score);
+              existing.averageScore =
+                existing.scores.reduce((total, score) => total + score, 0) /
+                existing.scores.length;
             }
           } else {
             studentMap.set(session.studentId, {
               id: session.studentId,
               name: session.studentName,
               avatar: session.studentAvatar,
-              email: `${session.studentName.toLowerCase().replace(/\s/g, '.')}@student.com`, // Mock email
               sessionCount: 1,
               lastSession: session.startTime,
               subjects: [session.subjectName],
               averageScore: session.score !== undefined && session.score !== null ? session.score : undefined,
+              scores: session.score !== undefined && session.score !== null ? [session.score] : [],
             });
           }
         }
@@ -83,9 +84,9 @@ const Students: React.FC = () => {
     <div>
       <div style={{ marginBottom: 24 }}>
         <Title level={2} style={{ margin: 0, fontWeight: 700, color: '#101114' }}>
-          Học sinh của tôi
+          My Students
         </Title>
-        <Text type="secondary">Danh sách học sinh đã hoàn thành buổi học</Text>
+        <Text type="secondary">Students who have completed a session with you</Text>
       </div>
 
       <Card 
@@ -107,16 +108,12 @@ const Students: React.FC = () => {
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                       <Text strong style={{ fontSize: 16 }}>{student.name}</Text>
-                      <Tag color="purple">{student.sessionCount} buổi</Tag>
+                      <Tag color="purple">{student.sessionCount} sessions</Tag>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                      <Text type="secondary" style={{ fontSize: 13 }}>
-                        <MailOutlined style={{ marginRight: 4 }} />
-                        {student.email}
-                      </Text>
                       {student.lastSession && (
                         <Text type="secondary" style={{ fontSize: 13 }}>
-                          Lần cuối: {dayjs(student.lastSession).format('DD/MM/YYYY')}
+                          Last session: {dayjs(student.lastSession).format('MMM D, YYYY')}
                         </Text>
                       )}
                     </div>
@@ -140,7 +137,7 @@ const Students: React.FC = () => {
           />
         ) : (
           <Empty 
-            description="Chưa có học sinh nào hoàn thành buổi học với bạn" 
+            description="No students have completed a session with you yet"
             style={{ padding: '48px 0' }}
           />
         )}
