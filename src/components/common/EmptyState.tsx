@@ -11,7 +11,7 @@ interface EmptyStateProps {
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
-  title = 'Không có dữ liệu',
+  title = 'No data',
   description,
   icon,
   actionText,

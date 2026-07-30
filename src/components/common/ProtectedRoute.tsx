@@ -14,7 +14,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) 
 
   // Still loading
   if (!token && isAuthenticated === false) {
-    return <Loading fullPage tip="Đang kiểm tra đăng nhập..." />;
+    return <Loading fullPage tip="Checking authentication..." />;
   }
 
   // Not authenticated

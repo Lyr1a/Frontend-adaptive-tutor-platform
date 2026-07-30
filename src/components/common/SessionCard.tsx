@@ -1,5 +1,5 @@
 import React from 'react';
-import { Avatar } from 'antd';
+import { Avatar, Button } from 'antd';
 import { UserOutlined, VideoCameraOutlined, CalendarOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import type { Session, SessionStatus } from '../../types';
@@ -31,8 +31,8 @@ export const SessionCard: React.FC<SessionCardProps> = ({
     (session.status === 'Confirmed' || session.status === 'Pending') &&
     new Date(session.startTime) <= new Date();
 
-  const canProposeChange = session.status === 'Confirmed' || session.status === 'Pending';
-  const canCancel = session.status === 'Confirmed' || session.status === 'Pending';
+  const canProposeChange = session.status === 'Confirmed';
+  const canCancel = session.status === 'Confirmed';
   const canComplete = userRole === 'Tutor' && session.status === 'Confirmed' &&
     new Date(session.startTime) <= new Date();
 
@@ -59,7 +59,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
               {otherPerson.name}
             </h4>
             <p style={{ margin: 0, fontSize: 14, color: '#686b82' }}>
-              {userRole === 'Student' ? 'Gia sư' : 'Học sinh'}
+              {userRole === 'Student' ? 'Tutor' : 'Student'}
             </p>
           </div>
         </div>
@@ -92,14 +92,14 @@ export const SessionCard: React.FC<SessionCardProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <VideoCameraOutlined style={{ color: '#686b82' }} />
             <span style={{ fontSize: 14, color: '#7132f5' }}>
-              Có link học trực tuyến
+              Online meeting link available
             </span>
           </div>
         )}
 
         {session.score !== undefined && session.score !== null && (
           <div style={{ fontSize: 14, color: '#101114' }}>
-            Điểm số: <strong>{session.score}</strong>
+            Score: <strong>{session.score}</strong>
           </div>
         )}
       </div>
@@ -109,74 +109,33 @@ export const SessionCard: React.FC<SessionCardProps> = ({
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {canJoin && (
             <Link to={session.meetingLink!} target="_blank">
-              <button
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#149e61',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: 10,
-                  fontSize: 13,
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                }}
-              >
-                Tham gia ngay
-              </button>
+              <Button type="primary" style={{ backgroundColor: '#149e61' }}>
+                Join Now
+              </Button>
             </Link>
           )}
           
           <Link to={userRole === 'Student' ? `/student/session/${session.id}` : `/tutor/session/${session.id}`}>
-            <button
-              style={{
-                padding: '8px 16px',
-                backgroundColor: 'rgba(113, 50, 245, 0.08)',
-                color: '#7132f5',
-                border: 'none',
-                borderRadius: 10,
-                fontSize: 13,
-                fontWeight: 500,
-                cursor: 'pointer',
-              }}
-            >
-              Chi tiết
-            </button>
+            <Button type="primary" ghost>
+              Details
+            </Button>
           </Link>
 
           {canProposeChange && (
-            <button
+            <Button
               onClick={() => onProposeChange?.(session.id)}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: 'rgba(148, 151, 169, 0.08)',
-                color: '#101114',
-                border: 'none',
-                borderRadius: 10,
-                fontSize: 13,
-                fontWeight: 500,
-                cursor: 'pointer',
-              }}
             >
-              Đề xuất đổi lịch
-            </button>
+              Request Reschedule
+            </Button>
           )}
 
           {canCancel && (
-            <button
+            <Button
+              danger
               onClick={() => onCancel?.(session.id)}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: 'rgba(220, 38, 38, 0.08)',
-                color: '#dc2626',
-                border: 'none',
-                borderRadius: 10,
-                fontSize: 13,
-                fontWeight: 500,
-                cursor: 'pointer',
-              }}
             >
-              Hủy
-            </button>
+              Cancel
+            </Button>
           )}
         </div>
       )}

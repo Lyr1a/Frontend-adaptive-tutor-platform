@@ -251,6 +251,26 @@ body {
   line-height: 1.38;
 }
 
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--kraken-purple);
+  outline-offset: 2px;
+}
+
+img {
+  max-width: 100%;
+}
+
 a {
   color: var(--kraken-purple);
   text-decoration: none;
@@ -335,3 +355,37 @@ a:hover {
 .mb-lg { margin-bottom: var(--spacing-lg); }
 .mb-xl { margin-bottom: var(--spacing-xl); }
 .mb-2xl { margin-bottom: var(--spacing-2xl); }
+
+@media (max-width: 767px) {
+  .container {
+    padding: 0 var(--spacing-lg);
+  }
+
+  .text-hero {
+    font-size: 36px;
+  }
+
+  .text-heading {
+    font-size: 30px;
+  }
+
+  .text-subheading {
+    font-size: 24px;
+  }
+
+  .card {
+    padding: var(--spacing-lg);
+  }
+
+  .ant-card .ant-card-body {
+    padding: 16px;
+  }
+
+  .ant-modal {
+    max-width: calc(100vw - 24px);
+  }
+
+  .ant-tabs-nav-list {
+    min-width: max-content;
+  }
+}

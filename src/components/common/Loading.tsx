@@ -10,7 +10,7 @@ interface LoadingProps {
 
 export const Loading: React.FC<LoadingProps> = ({ 
   fullPage = false, 
-  tip = 'Đang tải...',
+  tip = 'Loading...',
   size = 'default'
 }) => {
   const indicator = <LoadingOutlined spin style={{ fontSize: size === 'small' ? 16 : size === 'large' ? 32 : 24, color: '#7132f5' }} />;

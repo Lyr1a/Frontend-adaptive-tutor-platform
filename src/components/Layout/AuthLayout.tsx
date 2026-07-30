@@ -20,13 +20,16 @@ export const AuthLayout: React.FC = () => {
         maxWidth: 440,
       }}>
         {/* Logo */}
-        <div style={{
+        <Link to="/" aria-label="Go to home page" style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           marginBottom: 40,
           flexDirection: 'column',
           gap: 16,
+          color: 'inherit',
+          textDecoration: 'none',
+          cursor: 'pointer',
         }}>
           <div style={{
             width: 64,
@@ -49,10 +52,10 @@ export const AuthLayout: React.FC = () => {
               TutorMatch
             </Title>
             <Text type="secondary" style={{ fontSize: 14 }}>
-              Nền tảng kết nối Học sinh và Gia sư
+              Connecting Students and Tutors
             </Text>
           </div>
-        </div>
+        </Link>
 
         {/* Auth Card */}
         <div style={{
@@ -72,7 +75,7 @@ export const AuthLayout: React.FC = () => {
           textAlign: 'center',
         }}>
           <Text type="secondary" style={{ fontSize: 13 }}>
-            &copy; {new Date().getFullYear()} TutorMatch. Tất cả quyền được bảo lưu.
+            &copy; {new Date().getFullYear()} TutorMatch. All rights reserved.
           </Text>
         </div>
       </div>

@@ -5,7 +5,7 @@ export const validateEmail = (email: string): boolean => {
 
 export const validatePassword = (password: string): { valid: boolean; message: string } => {
   if (password.length < 6) {
-    return { valid: false, message: 'Mật khẩu phải có ít nhất 6 ký tự' };
+    return { valid: false, message: 'Password must contain at least 6 characters' };
   }
   return { valid: true, message: '' };
 };
