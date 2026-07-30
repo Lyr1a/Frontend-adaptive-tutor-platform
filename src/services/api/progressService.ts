@@ -17,13 +17,17 @@ export const progressService = {
     await api.post(API_ENDPOINTS.recordResult, data);
   },
 
-  getGoals: async (): Promise<LearningMilestone[]> => {
-    const response = await api.get<LearningMilestone[]>(API_ENDPOINTS.goals);
-    return response.data;
+  getGoals: async (subjectId = 1): Promise<LearningMilestone[]> => {
+    const response = await api.get<LearningMilestone[] | null>(API_ENDPOINTS.goals, {
+      params: { subjectId },
+    });
+    return response.data ?? [];
   },
 
-  getChart: async (): Promise<ProgressChartData> => {
-    const response = await api.get<ProgressChartData>(API_ENDPOINTS.progressChart);
+  getChart: async (subjectId = 1): Promise<ProgressChartData> => {
+    const response = await api.get<ProgressChartData>(API_ENDPOINTS.progressChart, {
+      params: { subjectId, timeRange: '30days' },
+    });
     return response.data;
   },
 };

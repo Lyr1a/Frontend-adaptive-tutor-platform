@@ -80,7 +80,7 @@ const ProgressPage: React.FC = () => {
 
       <div style={{ marginBottom: 8 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-          <Text type="secondary">Tiến độ</Text>
+          <Text type="secondary">Progress</Text>
           <Text strong style={{ color: '#7132f5' }}>{milestone.completionPercentage}%</Text>
         </div>
         <Progress 
@@ -93,7 +93,7 @@ const ProgressPage: React.FC = () => {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Text type="secondary" style={{ fontSize: 12 }}>
-          Ngày mục tiêu: {formatDate(milestone.targetDate)}
+          Target Date: {formatDate(milestone.targetDate)}
         </Text>
         {milestone.completionPercentage >= 100 && (
           <TrophyOutlined style={{ color: '#f59e0b', fontSize: 20 }} />
@@ -110,9 +110,9 @@ const ProgressPage: React.FC = () => {
     <div>
       <div style={{ marginBottom: 24 }}>
         <Title level={2} style={{ margin: 0, fontWeight: 700, color: '#101114' }}>
-          Tiến độ học tập
+          Learning Progress
         </Title>
-        <Text type="secondary">Theo dõi mục tiêu và thành tích của bạn</Text>
+        <Text type="secondary">Track your goals and achievements</Text>
       </div>
 
       {/* Stats Overview */}
@@ -120,25 +120,25 @@ const ProgressPage: React.FC = () => {
         <Col xs={12} md={6}>
           <Card variant="borderless" style={{ borderRadius: 12, textAlign: 'center', boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}>
             <div style={{ fontSize: 32, fontWeight: 700, color: '#7132f5' }}>{milestones.length}</div>
-            <Text type="secondary">Tổng mục tiêu</Text>
+            <Text type="secondary">Total Goals</Text>
           </Card>
         </Col>
         <Col xs={12} md={6}>
           <Card variant="borderless" style={{ borderRadius: 12, textAlign: 'center', boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}>
             <div style={{ fontSize: 32, fontWeight: 700, color: '#149e61' }}>{completedMilestones.length}</div>
-            <Text type="secondary">Đã hoàn thành</Text>
+            <Text type="secondary">Completed</Text>
           </Card>
         </Col>
         <Col xs={12} md={6}>
           <Card variant="borderless" style={{ borderRadius: 12, textAlign: 'center', boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}>
             <div style={{ fontSize: 32, fontWeight: 700, color: '#d97706' }}>{inProgressMilestones.length}</div>
-            <Text type="secondary">Đang tiến hành</Text>
+            <Text type="secondary">In Progress</Text>
           </Card>
         </Col>
         <Col xs={12} md={6}>
           <Card variant="borderless" style={{ borderRadius: 12, textAlign: 'center', boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}>
             <div style={{ fontSize: 32, fontWeight: 700, color: '#7132f5' }}>{averageProgress}%</div>
-            <Text type="secondary">Tiến độ TB</Text>
+            <Text type="secondary">Average Progress</Text>
           </Card>
         </Col>
       </Row>
@@ -154,45 +154,45 @@ const ProgressPage: React.FC = () => {
           items={[
             {
               key: 'overview',
-              label: 'Tất cả',
+              label: 'All',
               children: (
                 milestones.length > 0 ? (
                   <div>{milestones.map(renderMilestoneCard)}</div>
                 ) : (
-                  <Empty description="Chưa có mục tiêu nào" />
+                  <Empty description="No goals yet" />
                 )
               ),
             },
             {
               key: 'completed',
-              label: `Đã hoàn thành (${completedMilestones.length})`,
+              label: `Completed (${completedMilestones.length})`,
               children: (
                 completedMilestones.length > 0 ? (
                   <div>{completedMilestones.map(renderMilestoneCard)}</div>
                 ) : (
-                  <Empty description="Chưa có mục tiêu hoàn thành" />
+                  <Empty description="No completed goals yet" />
                 )
               ),
             },
             {
               key: 'inProgress',
-              label: `Đang tiến hành (${inProgressMilestones.length})`,
+              label: `In Progress (${inProgressMilestones.length})`,
               children: (
                 inProgressMilestones.length > 0 ? (
                   <div>{inProgressMilestones.map(renderMilestoneCard)}</div>
                 ) : (
-                  <Empty description="Không có mục tiêu đang tiến hành" />
+                  <Empty description="No goals in progress" />
                 )
               ),
             },
             {
               key: 'notStarted',
-              label: `Chưa bắt đầu (${notStartedMilestones.length})`,
+              label: `Not Started (${notStartedMilestones.length})`,
               children: (
                 notStartedMilestones.length > 0 ? (
                   <div>{notStartedMilestones.map(renderMilestoneCard)}</div>
                 ) : (
-                  <Empty description="Tất cả mục tiêu đã được bắt đầu" />
+                  <Empty description="All goals have been started" />
                 )
               ),
             },
