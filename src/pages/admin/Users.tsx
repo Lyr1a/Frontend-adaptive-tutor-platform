@@ -29,7 +29,7 @@ const Users: React.FC = () => {
       setUsers(data);
     } catch (error) {
       console.error('Failed to fetch users:', error);
-      message.error('Không thể tải danh sách người dùng');
+      message.error('Unable to load users');
     } finally {
       setLoading(false);
     }
@@ -37,17 +37,25 @@ const Users: React.FC = () => {
 
   const handleSuspend = async () => {
     if (!selectedUser) return;
+    if (!reason.trim()) {
+      message.warning('Please enter a reason.');
+      return;
+    }
 
     setSubmitting(true);
     try {
       await adminService.suspendUser(selectedUser.id, reason);
-      message.success('Đã khóa tài khoản thành công!');
+      message.success(
+        selectedUser.isSuspended
+          ? 'Account reactivated successfully!'
+          : 'Account suspended successfully!'
+      );
       setModalVisible(false);
       setSelectedUser(null);
       setReason('');
       fetchUsers();
     } catch (error) {
-      message.error('Không thể khóa tài khoản');
+      message.error('Unable to update account suspension');
     } finally {
       setSubmitting(false);
     }
@@ -55,17 +63,21 @@ const Users: React.FC = () => {
 
   const handleKick = async () => {
     if (!selectedUser) return;
+    if (!reason.trim()) {
+      message.warning('Please enter a reason.');
+      return;
+    }
 
     setSubmitting(true);
     try {
       await adminService.kickUser(selectedUser.id, reason);
-      message.success('Đã xóa tài khoản thành công!');
+      message.success('Account deactivated successfully!');
       setModalVisible(false);
       setSelectedUser(null);
       setReason('');
       fetchUsers();
     } catch (error) {
-      message.error('Không thể xóa tài khoản');
+      message.error('Unable to deactivate the account');
     } finally {
       setSubmitting(false);
     }
@@ -79,9 +91,9 @@ const Users: React.FC = () => {
 
   const getRoleLabel = (role: UserRole) => {
     const labels: Record<UserRole, string> = {
-      Student: 'Học sinh',
-      Tutor: 'Gia sư',
-      Administrator: 'Quản trị',
+      Student: 'Student',
+      Tutor: 'Tutor',
+      Administrator: 'Administrator',
     };
     return labels[role] || role;
   };
@@ -102,7 +114,7 @@ const Users: React.FC = () => {
 
   const columns = [
     {
-      title: 'Người dùng',
+      title: 'User',
       dataIndex: 'fullName',
       key: 'fullName',
       render: (text: string, record: AdminUser) => (
@@ -124,7 +136,7 @@ const Users: React.FC = () => {
       ),
     },
     {
-      title: 'Vai trò',
+      title: 'Role',
       dataIndex: 'role',
       key: 'role',
       render: (role: UserRole) => (
@@ -132,7 +144,7 @@ const Users: React.FC = () => {
       ),
     },
     {
-      title: 'Credit',
+      title: 'Learning Credits',
       dataIndex: 'creditBalance',
       key: 'creditBalance',
       render: (balance: number) => (
@@ -142,7 +154,7 @@ const Users: React.FC = () => {
       ),
     },
     {
-      title: 'Trạng thái',
+      title: 'Status',
       key: 'status',
       render: (_: any, record: AdminUser) => (
         record.isSuspended 
@@ -160,20 +172,20 @@ const Users: React.FC = () => {
           <Space direction="vertical" size={0}>
             <StatusBadge status={record.tutorProfile.status} size="small" />
             <Text type="secondary" style={{ fontSize: 12 }}>
-              Điểm: {record.tutorProfile.reputationScore.toFixed(1)}
+              Score: {record.tutorProfile.reputationScore.toFixed(1)}
             </Text>
           </Space>
         );
       },
     },
     {
-      title: 'Ngày tạo',
+      title: 'Created Date',
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (date: string) => formatDateTime(date),
     },
     {
-      title: 'Thao tác',
+      title: 'Actions',
       key: 'action',
       render: (_: any, record: AdminUser) => (
         <Space>
@@ -185,7 +197,7 @@ const Users: React.FC = () => {
             onClick={() => openModal(record, 'suspend')}
             disabled={record.role === 'Administrator'}
           >
-            {record.isSuspended ? 'Mở khóa' : 'Khóa'}
+            {record.isSuspended ? 'Reactivate' : 'Suspend'}
           </Button>
           <Button 
             type="text"
@@ -195,7 +207,7 @@ const Users: React.FC = () => {
             onClick={() => openModal(record, 'kick')}
             disabled={record.role === 'Administrator'}
           >
-            Xóa
+            Deactivate
           </Button>
         </Space>
       ),
@@ -210,9 +222,9 @@ const Users: React.FC = () => {
     <div>
       <div style={{ marginBottom: 24 }}>
         <Title level={2} style={{ margin: 0, fontWeight: 700, color: '#101114' }}>
-          Quản lý người dùng
+          User Management
         </Title>
-        <Text type="secondary">Xem và quản lý tất cả người dùng trên nền tảng</Text>
+        <Text type="secondary">View and manage all users on the platform</Text>
       </div>
 
       <Card 
@@ -221,7 +233,7 @@ const Users: React.FC = () => {
       >
         <div style={{ marginBottom: 16 }}>
           <Input
-            placeholder="Tìm kiếm theo tên hoặc email..."
+            placeholder="Search by name or email..."
             prefix={<SearchOutlined style={{ color: '#9497a9' }} />}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -234,12 +246,19 @@ const Users: React.FC = () => {
           columns={columns}
           rowKey="id"
           pagination={{ pageSize: 10 }}
+          scroll={{ x: 1000 }}
         />
       </Card>
 
       {/* Suspend/Kick Modal */}
       <Modal
-        title={actionType === 'suspend' ? 'Khóa tài khoản' : 'Xóa tài khoản'}
+        title={
+          actionType === 'suspend'
+            ? selectedUser?.isSuspended
+              ? 'Reactivate Account'
+              : 'Suspend Account'
+            : 'Deactivate Account'
+        }
         open={modalVisible}
         onCancel={() => {
           setModalVisible(false);
@@ -281,33 +300,37 @@ const Users: React.FC = () => {
             }}>
               <Text style={{ color: actionType === 'kick' ? '#dc2626' : '#b45309' }}>
                 {actionType === 'kick' 
-                  ? 'Cảnh báo: Xóa tài khoản là hành động không thể hoàn tác. Tài khoản sẽ bị vô hiệu hóa vĩnh viễn.'
-                  : 'Khóa tài khoản sẽ ngăn cản người dùng đăng nhập. Bạn có thể mở khóa sau.'
+                  ? 'The account will be deactivated and signed out of active sessions. Historical data will be retained.'
+                  : 'Suspending the account prevents sign-in. You can reactivate it later.'
                 }
               </Text>
             </div>
 
             <div>
               <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
-                Lý do <span style={{ color: '#dc2626' }}>*</span>
+                Reason <span style={{ color: '#dc2626' }}>*</span>
               </label>
               <TextArea
                 rows={3}
-                placeholder="Nhập lý do..."
+                placeholder="Enter a reason..."
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
               />
             </div>
 
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 24 }}>
-              <Button onClick={() => setModalVisible(false)}>Hủy</Button>
+              <Button onClick={() => setModalVisible(false)}>Cancel</Button>
               <Button 
                 type="primary" 
                 danger
                 loading={submitting}
                 onClick={actionType === 'suspend' ? handleSuspend : handleKick}
               >
-                {actionType === 'suspend' ? 'Khóa tài khoản' : 'Xóa tài khoản'}
+                {actionType === 'suspend'
+                  ? selectedUser.isSuspended
+                    ? 'Reactivate Account'
+                    : 'Suspend Account'
+                  : 'Deactivate Account'}
               </Button>
             </div>
           </div>
