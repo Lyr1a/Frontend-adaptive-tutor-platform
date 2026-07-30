@@ -130,6 +130,7 @@ export interface Session {
   startTime: string;
   endTime: string;
   meetingLink?: string;
+  canJoin?: boolean;
   status: SessionStatus;
   score?: number;
   tutorComment?: string;
@@ -248,7 +249,8 @@ export interface RecordResultRequest {
   sessionId: number;
   score: number;
   tutorComment?: string;
-  goalCompletionPercentage?: number;
+  milestoneId?: number;
+  completionPercentage?: number;
 }
 
 export interface ProgressChartData {

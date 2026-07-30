@@ -4,6 +4,7 @@ import { UserOutlined, StarFilled } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import type { TutorProfile } from '../../types';
 import StatusBadge from './StatusBadge';
+import { formatCurrency } from '../../utils';
 
 interface TutorCardProps {
   tutor: TutorProfile;
@@ -15,7 +16,7 @@ interface TutorCardProps {
 export const TutorCard: React.FC<TutorCardProps> = ({
   tutor,
   showAction = true,
-  actionText = 'Xem chi tiết',
+  actionText = 'View Details',
   onAction,
 }) => {
   return (
@@ -104,7 +105,7 @@ export const TutorCard: React.FC<TutorCardProps> = ({
                 fontWeight: 500,
               }}
             >
-              +{tutor.subjects.length - 3} môn khác
+              +{tutor.subjects.length - 3} more subjects
             </span>
           )}
         </div>
@@ -117,16 +118,8 @@ export const TutorCard: React.FC<TutorCardProps> = ({
           fontWeight: 600,
           color: '#7132f5',
         }}>
-          {new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND',
-            minimumFractionDigits: 0,
-          }).format(Math.min(...tutor.subjects.map(s => s.hourlyRate)))} - {' '}
-          {new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND',
-            minimumFractionDigits: 0,
-          }).format(Math.max(...tutor.subjects.map(s => s.hourlyRate)))} / giờ
+          {formatCurrency(Math.min(...tutor.subjects.map(s => s.hourlyRate)))} - {' '}
+          {formatCurrency(Math.max(...tutor.subjects.map(s => s.hourlyRate)))} / hour
         </div>
       )}
 

@@ -60,11 +60,23 @@ api.interceptors.response.use(
       }
     }
     
-    // Handle other errors
-    if (error.response?.status === 403) {
-      // User is suspended
-      useAuthStore.getState().logout();
-      window.location.href = '/login?reason=suspended';
+    // Redirect unsupported endpoints and features to a clear error page.
+    if ([404, 405, 501].includes(error.response?.status ?? 0)) {
+      window.location.href = '/404';
+    }
+
+    if (
+      error.response?.status === 403 &&
+      !originalRequest.url?.includes('/api/auth/login')
+    ) {
+      window.location.href = '/404';
+    }
+
+    if (
+      originalRequest.method?.toLowerCase() === 'get' &&
+      (!error.response || (error.response.status >= 500 && error.response.status <= 599))
+    ) {
+      window.location.href = '/404';
     }
     
     return Promise.reject(error);

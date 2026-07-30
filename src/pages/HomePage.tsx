@@ -19,31 +19,31 @@ const HomePage: React.FC = () => {
   const features = [
     {
       icon: <SearchOutlined style={{ fontSize: 32, color: '#7132f5' }} />,
-      title: 'Tìm kiếm gia sư',
-      description: 'Lọc theo môn học, mức giá và lịch trình phù hợp với bạn',
+      title: 'Find Tutors',
+      description: 'Filter by subject, rate, and schedule to find the right match',
     },
     {
       icon: <ClockCircleOutlined style={{ fontSize: 32, color: '#7132f5' }} />,
-      title: 'Đặt lịch dễ dàng',
-      description: 'Chủ động sắp xếp thời gian học theo nhu cầu của bạn',
+      title: 'Easy Booking',
+      description: 'Schedule sessions around your learning needs',
     },
     {
       icon: <TeamOutlined style={{ fontSize: 32, color: '#7132f5' }} />,
-      title: 'Kết nối trực tiếp',
-      description: 'Giao tiếp và học tập qua nền tảng trực tuyến',
+      title: 'Direct Connection',
+      description: 'Communicate and learn through an online platform',
     },
     {
       icon: <SafetyOutlined style={{ fontSize: 32, color: '#7132f5' }} />,
-      title: 'An toàn & bảo mật',
-      description: 'Hệ thống ví Credit bảo vệ quyền lợi cho cả hai bên',
+      title: 'Safe and Secure',
+      description: 'The Learning Credit wallet protects both students and tutors',
     },
   ];
 
   const stats = [
-    { value: 1000, suffix: '+', label: 'Gia sư chất lượng' },
-    { value: 5000, suffix: '+', label: 'Buổi học hoàn thành' },
-    { value: 10, suffix: '', label: 'Môn học đa dạng' },
-    { value: 4.8, suffix: '/5', label: 'Đánh giá trung bình' },
+    { value: 1000, suffix: '+', label: 'Qualified Tutors' },
+    { value: 5000, suffix: '+', label: 'Completed Sessions' },
+    { value: 10, suffix: '', label: 'Subjects Available' },
+    { value: 4.8, suffix: '/5', label: 'Average Rating' },
   ];
 
   return (
@@ -85,15 +85,15 @@ const HomePage: React.FC = () => {
                 else if (user?.role === 'Administrator') navigate('/admin/dashboard');
               }}
             >
-              Đi đến Dashboard
+              Go to Dashboard
             </Button>
           ) : (
             <>
               <Link to="/login">
-                <Button type="text" style={{ fontWeight: 500 }}>Đăng nhập</Button>
+                <Button type="text" style={{ fontWeight: 500 }}>Sign in</Button>
               </Link>
               <Link to="/register">
-                <Button type="primary">Đăng ký</Button>
+                <Button type="primary">Sign up</Button>
               </Link>
             </>
           )}
@@ -114,9 +114,9 @@ const HomePage: React.FC = () => {
           letterSpacing: '-1px',
           lineHeight: 1.15,
         }}>
-          Kết nối Gia sư & Học sinh
+          Connecting Tutors and Students
           <br />
-          <span style={{ color: '#7132f5' }}>Một cách dễ dàng</span>
+          <span style={{ color: '#7132f5' }}>Made Simple</span>
         </Title>
         <Paragraph style={{
           fontSize: 18,
@@ -124,8 +124,8 @@ const HomePage: React.FC = () => {
           maxWidth: 560,
           margin: '0 auto 40px',
         }}>
-          Nền tảng học tập trực tuyến giúp bạn tìm được gia sư phù hợp, 
-          đặt lịch học và theo dõi tiến độ học tập một cách hiệu quả.
+          An online learning platform that helps you find the right tutor,
+          book sessions, and track your learning progress effectively.
         </Paragraph>
         
         {!isAuthenticated && (
@@ -143,7 +143,7 @@ const HomePage: React.FC = () => {
                   borderRadius: 12,
                 }}
               >
-                Bắt đầu ngay
+                Get Started
                 <ArrowRightOutlined style={{ marginLeft: 8 }} />
               </Button>
             </Link>
@@ -159,7 +159,7 @@ const HomePage: React.FC = () => {
                   borderRadius: 12,
                 }}
               >
-                Tìm hiểu thêm
+                Learn More
               </Button>
             </Link>
           </div>
@@ -203,10 +203,10 @@ const HomePage: React.FC = () => {
       <section style={{ padding: '80px 48px', backgroundColor: '#ffffff' }}>
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <Title level={2} style={{ fontWeight: 700, marginBottom: 8 }}>
-            Tại sao chọn TutorMatch?
+            Why Choose TutorMatch?
           </Title>
           <Paragraph type="secondary" style={{ fontSize: 16 }}>
-            Những tính năng nổi bật giúp việc học tập trở nên dễ dàng hơn
+            Powerful features that make learning easier
           </Paragraph>
         </div>
 
@@ -257,14 +257,14 @@ const HomePage: React.FC = () => {
             fontWeight: 700, 
             marginBottom: 16 
           }}>
-            Sẵn sàng bắt đầu?
+            Ready to Get Started?
           </Title>
           <Paragraph style={{ 
             color: 'rgba(255, 255, 255, 0.8)', 
             fontSize: 18,
             marginBottom: 32,
           }}>
-            Đăng ký ngay hôm nay và bắt đầu hành trình học tập của bạn
+            Create an account today and start your learning journey
           </Paragraph>
           <Link to="/register">
             <Button 
@@ -280,7 +280,7 @@ const HomePage: React.FC = () => {
                 color: '#7132f5',
               }}
             >
-              Đăng ký miễn phí
+              Sign Up for Free
             </Button>
           </Link>
         </section>
@@ -294,7 +294,7 @@ const HomePage: React.FC = () => {
         textAlign: 'center',
       }}>
         <Text style={{ color: '#9497a9' }}>
-          © {new Date().getFullYear()} TutorMatch. Tất cả quyền được bảo lưu.
+          © {new Date().getFullYear()} TutorMatch. All rights reserved.
         </Text>
       </footer>
     </div>

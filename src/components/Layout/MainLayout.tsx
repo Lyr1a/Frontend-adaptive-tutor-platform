@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Dropdown, Avatar, Badge, Button, List, Popover, Typography, Space } from 'antd';
+import { Layout, Menu, Dropdown, Avatar, Badge, Button, List, Popover, Typography, Space, Grid } from 'antd';
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -11,15 +11,15 @@ import {
   BarChartOutlined,
   LogoutOutlined,
   BellOutlined,
-  SettingOutlined,
+  LockOutlined,
   ClockCircleOutlined,
-  DollarCircleOutlined,
+  StarOutlined,
   FileProtectOutlined,
   TeamOutlined,
   ExclamationCircleOutlined,
   UserAddOutlined,
 } from '@ant-design/icons';
-import { useNavigate, useLocation, Outlet } from 'react-router-dom';
+import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuthStore } from '../../stores';
 import { notificationService } from '../../services';
 import type { Notification } from '../../types';
@@ -30,6 +30,7 @@ dayjs.extend(relativeTime);
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
+const { useBreakpoint } = Grid;
 
 interface MenuItem {
   key: string;
@@ -39,29 +40,29 @@ interface MenuItem {
 }
 
 const studentMenuItems: MenuItem[] = [
-  { key: 'dashboard', icon: <HomeOutlined />, label: 'Trang chủ', path: '/student/dashboard' },
-  { key: 'search', icon: <SearchOutlined />, label: 'Tìm gia sư', path: '/student/search-tutors' },
-  { key: 'sessions', icon: <SolutionOutlined />, label: 'Lịch học', path: '/student/sessions' },
-  { key: 'wallet', icon: <WalletOutlined />, label: 'Ví Credit', path: '/student/wallet' },
-  { key: 'progress', icon: <BarChartOutlined />, label: 'Tiến độ học tập', path: '/student/progress' },
-  { key: 'profile', icon: <UserOutlined />, label: 'Hồ sơ', path: '/student/profile' },
+  { key: 'dashboard', icon: <HomeOutlined />, label: 'Home', path: '/student/dashboard' },
+  { key: 'search', icon: <SearchOutlined />, label: 'Find Tutors', path: '/student/search-tutors' },
+  { key: 'sessions', icon: <SolutionOutlined />, label: 'My Sessions', path: '/student/sessions' },
+  { key: 'wallet', icon: <WalletOutlined />, label: 'Learning Credit Wallet', path: '/student/wallet' },
+  { key: 'progress', icon: <BarChartOutlined />, label: 'Learning Progress', path: '/student/progress' },
+  { key: 'profile', icon: <UserOutlined />, label: 'Profile', path: '/student/profile' },
 ];
 
 const tutorMenuItems: MenuItem[] = [
-  { key: 'dashboard', icon: <HomeOutlined />, label: 'Trang chủ', path: '/tutor/dashboard' },
-  { key: 'sessions', icon: <SolutionOutlined />, label: 'Lịch dạy', path: '/tutor/sessions' },
-  { key: 'schedule', icon: <ClockCircleOutlined />, label: 'Lịch rảnh', path: '/tutor/schedule' },
-  { key: 'students', icon: <TeamOutlined />, label: 'Học sinh', path: '/tutor/students' },
-  { key: 'wallet', icon: <WalletOutlined />, label: 'Ví Credit', path: '/tutor/wallet' },
-  { key: 'profile', icon: <UserOutlined />, label: 'Hồ sơ', path: '/tutor/profile' },
+  { key: 'dashboard', icon: <HomeOutlined />, label: 'Home', path: '/tutor/dashboard' },
+  { key: 'sessions', icon: <SolutionOutlined />, label: 'Teaching Sessions', path: '/tutor/sessions' },
+  { key: 'schedule', icon: <ClockCircleOutlined />, label: 'Availability', path: '/tutor/schedule' },
+  { key: 'students', icon: <TeamOutlined />, label: 'Students', path: '/tutor/students' },
+  { key: 'wallet', icon: <WalletOutlined />, label: 'Learning Credit Wallet', path: '/tutor/wallet' },
+  { key: 'profile', icon: <UserOutlined />, label: 'Profile', path: '/tutor/profile' },
 ];
 
 const adminMenuItems: MenuItem[] = [
-  { key: 'dashboard', icon: <HomeOutlined />, label: 'Tổng quan', path: '/admin/dashboard' },
-  { key: 'tutors', icon: <UserAddOutlined />, label: 'Duyệt gia sư', path: '/admin/tutors/pending' },
-  { key: 'credits', icon: <DollarCircleOutlined />, label: 'Yêu cầu nạp tiền', path: '/admin/credits/pending' },
-  { key: 'complaints', icon: <ExclamationCircleOutlined />, label: 'Khiếu nại', path: '/admin/complaints' },
-  { key: 'users', icon: <TeamOutlined />, label: 'Quản lý người dùng', path: '/admin/users' },
+  { key: 'dashboard', icon: <HomeOutlined />, label: 'Dashboard', path: '/admin/dashboard' },
+  { key: 'tutors', icon: <UserAddOutlined />, label: 'Tutor Approvals', path: '/admin/tutors/pending' },
+  { key: 'credits', icon: <StarOutlined />, label: 'Learning Credit Requests', path: '/admin/credits/pending' },
+  { key: 'complaints', icon: <ExclamationCircleOutlined />, label: 'Complaints', path: '/admin/complaints' },
+  { key: 'users', icon: <TeamOutlined />, label: 'User Management', path: '/admin/users' },
 ];
 
 export const MainLayout: React.FC = () => {
@@ -70,6 +71,8 @@ export const MainLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuthStore();
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
 
   const getMenuItems = (): MenuItem[] => {
     switch (user?.role) {
@@ -115,6 +118,12 @@ export const MainLayout: React.FC = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (isMobile) {
+      setCollapsed(true);
+    }
+  }, [isMobile]);
+
   const handleMenuClick = ({ key }: { key: string }) => {
     const item = menuItems.find((i) => i.key === key);
     if (item) {
@@ -130,7 +139,7 @@ export const MainLayout: React.FC = () => {
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const notificationContent = (
-    <div style={{ width: 360, maxHeight: 400, overflow: 'auto' }}>
+    <div style={{ width: 'min(360px, calc(100vw - 32px))', maxHeight: 400, overflow: 'auto' }}>
       <div style={{ 
         padding: '12px 16px', 
         borderBottom: '1px solid #dedee5',
@@ -138,10 +147,17 @@ export const MainLayout: React.FC = () => {
         justifyContent: 'space-between',
         alignItems: 'center'
       }}>
-        <Text strong style={{ fontSize: 16 }}>Thông báo</Text>
+        <Text strong style={{ fontSize: 16 }}>Notifications</Text>
         {unreadCount > 0 && (
-          <Button type="link" size="small" onClick={() => notificationService.markAllAsRead()}>
-            Đánh dấu tất cả đã đọc
+          <Button
+            type="link"
+            size="small"
+            onClick={async () => {
+              await notificationService.markAllAsRead();
+              setNotifications((items) => items.map((item) => ({ ...item, isRead: true })));
+            }}
+          >
+            Mark all as read
           </Button>
         )}
       </div>
@@ -176,7 +192,7 @@ export const MainLayout: React.FC = () => {
             />
           </List.Item>
         )}
-        locale={{ emptyText: 'Không có thông báo' }}
+        locale={{ emptyText: 'No notifications' }}
       />
     </div>
   );
@@ -185,13 +201,14 @@ export const MainLayout: React.FC = () => {
     {
       key: 'profile',
       icon: <UserOutlined />,
-      label: 'Hồ sơ',
+      label: 'Profile',
       onClick: () => navigate(user?.role === 'Student' ? '/student/profile' : user?.role === 'Tutor' ? '/tutor/profile' : '/admin/dashboard'),
     },
     {
       key: 'settings',
-      icon: <SettingOutlined />,
-      label: 'Cài đặt',
+      icon: <LockOutlined />,
+      label: 'Change password',
+      onClick: () => navigate('/change-password'),
     },
     {
       type: 'divider' as const,
@@ -199,7 +216,7 @@ export const MainLayout: React.FC = () => {
     {
       key: 'logout',
       icon: <LogoutOutlined />,
-      label: 'Đăng xuất',
+      label: 'Sign out',
       onClick: handleLogout,
     },
   ];
@@ -215,16 +232,19 @@ export const MainLayout: React.FC = () => {
           boxShadow: '2px 0 8px rgba(0, 0, 0, 0.05)',
         }}
         width={240}
-        collapsedWidth={80}
+        collapsedWidth={isMobile ? 0 : 80}
       >
         {/* Logo */}
-        <div style={{
+        <Link to="/" aria-label="Go to home page" style={{
           height: 64,
           display: 'flex',
           alignItems: 'center',
           justifyContent: collapsed ? 'center' : 'flex-start',
           padding: collapsed ? 0 : '0 20px',
           borderBottom: '1px solid #dedee5',
+          color: 'inherit',
+          textDecoration: 'none',
+          cursor: 'pointer',
         }}>
           <div style={{
             width: 36,
@@ -248,7 +268,7 @@ export const MainLayout: React.FC = () => {
               TutorMatch
             </span>
           )}
-        </div>
+        </Link>
 
         {/* Menu */}
         <Menu
@@ -272,7 +292,7 @@ export const MainLayout: React.FC = () => {
         {/* Header */}
         <Header style={{
           backgroundColor: '#ffffff',
-          padding: '0 24px',
+          padding: isMobile ? '0 12px' : '0 24px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -288,7 +308,7 @@ export const MainLayout: React.FC = () => {
             style={{ fontSize: 16, width: 48, height: 48 }}
           />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 8 : 16 }}>
             {/* Notifications */}
             <Popover
               content={notificationContent}
@@ -313,14 +333,14 @@ export const MainLayout: React.FC = () => {
                   icon={<UserOutlined />}
                   style={{ backgroundColor: '#7132f5' }}
                 />
-                <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.3 }}>
+                {!isMobile && <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.3, maxWidth: 180 }}>
                   <span style={{ fontSize: 14, fontWeight: 500, color: '#101114' }}>
                     {user?.fullName}
                   </span>
                   <span style={{ fontSize: 12, color: '#686b82' }}>
-                    {user?.role === 'Student' ? 'Học sinh' : user?.role === 'Tutor' ? 'Gia sư' : 'Quản trị viên'}
+                    {user?.role === 'Student' ? 'Student' : user?.role === 'Tutor' ? 'Tutor' : 'Administrator'}
                   </span>
-                </div>
+                </div>}
               </Space>
             </Dropdown>
           </div>
@@ -328,8 +348,8 @@ export const MainLayout: React.FC = () => {
 
         {/* Content */}
         <Content style={{
-          margin: 24,
-          padding: 24,
+          margin: isMobile ? 12 : 24,
+          padding: isMobile ? 16 : 24,
           backgroundColor: '#f8f9fa',
           borderRadius: 12,
           minHeight: 280,

@@ -8,39 +8,39 @@ interface StatusBadgeProps {
 
 const statusConfig: Record<string, { bg: string; color: string; label: string }> = {
   // Session Status
-  Pending: { bg: 'rgba(217, 119, 6, 0.12)', color: '#b45309', label: 'Đang chờ' },
-  Confirmed: { bg: 'rgba(20, 158, 97, 0.16)', color: '#026b3f', label: 'Đã xác nhận' },
-  Completed: { bg: 'rgba(20, 158, 97, 0.16)', color: '#026b3f', label: 'Hoàn thành' },
-  Cancelled: { bg: 'rgba(220, 38, 38, 0.12)', color: '#b91c1c', label: 'Đã hủy' },
-  PendingChangeConfirmation: { bg: 'rgba(113, 50, 245, 0.12)', color: '#5b1ecf', label: 'Chờ đổi lịch' },
+  Pending: { bg: 'rgba(217, 119, 6, 0.12)', color: '#b45309', label: 'Pending' },
+  Confirmed: { bg: 'rgba(20, 158, 97, 0.16)', color: '#026b3f', label: 'Confirmed' },
+  Completed: { bg: 'rgba(20, 158, 97, 0.16)', color: '#026b3f', label: 'Completed' },
+  Cancelled: { bg: 'rgba(220, 38, 38, 0.12)', color: '#b91c1c', label: 'Cancelled' },
+  PendingChangeConfirmation: { bg: 'rgba(113, 50, 245, 0.12)', color: '#5b1ecf', label: 'Awaiting Reschedule' },
   
   // Profile Status
-  Approved: { bg: 'rgba(20, 158, 97, 0.16)', color: '#026b3f', label: 'Đã duyệt' },
-  Rejected: { bg: 'rgba(220, 38, 38, 0.12)', color: '#b91c1c', label: 'Từ chối' },
+  Approved: { bg: 'rgba(20, 158, 97, 0.16)', color: '#026b3f', label: 'Approved' },
+  Rejected: { bg: 'rgba(220, 38, 38, 0.12)', color: '#b91c1c', label: 'Rejected' },
   
   // Credit Request Status
-  Deposit: { bg: 'rgba(20, 158, 97, 0.16)', color: '#026b3f', label: 'Nạp tiền' },
-  SessionFee: { bg: 'rgba(113, 50, 245, 0.12)', color: '#5b1ecf', label: 'Phí buổi học' },
-  LateCancellationFee: { bg: 'rgba(220, 38, 38, 0.12)', color: '#b91c1c', label: 'Phí hủy muộn' },
-  Refund: { bg: 'rgba(20, 158, 97, 0.16)', color: '#026b3f', label: 'Hoàn tiền' },
+  Deposit: { bg: 'rgba(20, 158, 97, 0.16)', color: '#026b3f', label: 'Learning Credit Top-up' },
+  SessionFee: { bg: 'rgba(113, 50, 245, 0.12)', color: '#5b1ecf', label: 'Session Fee' },
+  LateCancellationFee: { bg: 'rgba(220, 38, 38, 0.12)', color: '#b91c1c', label: 'Late Cancellation Fee' },
+  Refund: { bg: 'rgba(20, 158, 97, 0.16)', color: '#026b3f', label: 'Refund' },
   
   // Change Request Status
-  Accepted: { bg: 'rgba(20, 158, 97, 0.16)', color: '#026b3f', label: 'Đã chấp nhận' },
+  Accepted: { bg: 'rgba(20, 158, 97, 0.16)', color: '#026b3f', label: 'Accepted' },
   
   // Milestone Status
-  NotStarted: { bg: 'rgba(104, 107, 130, 0.12)', color: '#484b5e', label: 'Chưa bắt đầu' },
-  InProgress: { bg: 'rgba(113, 50, 245, 0.12)', color: '#5b1ecf', label: 'Đang tiến hành' },
+  NotStarted: { bg: 'rgba(104, 107, 130, 0.12)', color: '#484b5e', label: 'Not Started' },
+  InProgress: { bg: 'rgba(113, 50, 245, 0.12)', color: '#5b1ecf', label: 'In Progress' },
   
   // Complaint Status
-  Resolved: { bg: 'rgba(20, 158, 97, 0.16)', color: '#026b3f', label: 'Đã xử lý' },
-  Dismissed: { bg: 'rgba(104, 107, 130, 0.12)', color: '#484b5e', label: 'Bỏ qua' },
+  Resolved: { bg: 'rgba(20, 158, 97, 0.16)', color: '#026b3f', label: 'Resolved' },
+  Dismissed: { bg: 'rgba(104, 107, 130, 0.12)', color: '#484b5e', label: 'Dismissed' },
   
   // User Status
-  Active: { bg: 'rgba(20, 158, 97, 0.16)', color: '#026b3f', label: 'Hoạt động' },
-  Suspended: { bg: 'rgba(220, 38, 38, 0.12)', color: '#b91c1c', label: 'Bị khóa' },
+  Active: { bg: 'rgba(20, 158, 97, 0.16)', color: '#026b3f', label: 'Active' },
+  Suspended: { bg: 'rgba(220, 38, 38, 0.12)', color: '#b91c1c', label: 'Suspended' },
   
   // Default
-  default: { bg: 'rgba(104, 107, 130, 0.12)', color: '#484b5e', label: 'Không xác định' },
+  default: { bg: 'rgba(104, 107, 130, 0.12)', color: '#484b5e', label: 'Unknown' },
 };
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'default' }) => {
