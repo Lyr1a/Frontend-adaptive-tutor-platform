@@ -5,13 +5,14 @@ import {
   StarFilled, 
   BookOutlined, 
   ClockCircleOutlined,
-  DollarOutlined,
   CalendarOutlined,
   ArrowLeftOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
 import { tutorService } from '../../services';
 import { Loading } from '../../components/common';
 import type { TutorProfile, Feedback } from '../../types';
+import { formatCurrency } from '../../utils';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
@@ -31,15 +32,19 @@ const TutorProfilePage: React.FC = () => {
       if (!id) return;
       
       try {
-        const [tutorData, feedbacksData] = await Promise.all([
-          tutorService.getDetails(Number(id)),
-          tutorService.getFeedbacks(Number(id)),
-        ]);
+        const tutorData = await tutorService.getDetails(Number(id));
         setTutor(tutorData);
-        setFeedbacks(feedbacksData);
+
+        try {
+          const feedbacksData = await tutorService.getFeedbacks(Number(id));
+          setFeedbacks(feedbacksData);
+        } catch (feedbackError) {
+          console.error('Failed to fetch tutor feedbacks:', feedbackError);
+          setFeedbacks([]);
+        }
       } catch (error) {
         console.error('Failed to fetch tutor data:', error);
-        message.error('Không thể tải thông tin gia sư');
+        message.error('Unable to load tutor information');
       } finally {
         setLoading(false);
       }
@@ -48,14 +53,6 @@ const TutorProfilePage: React.FC = () => {
     fetchData();
   }, [id]);
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-      minimumFractionDigits: 0,
-    }).format(value);
-  };
-
   if (loading) {
     return <Loading fullPage />;
   }
@@ -63,8 +60,8 @@ const TutorProfilePage: React.FC = () => {
   if (!tutor) {
     return (
       <Card variant="borderless" style={{ borderRadius: 12, textAlign: 'center', padding: 48 }}>
-        <Title level={4}>Không tìm thấy gia sư</Title>
-        <Button onClick={() => navigate(-1)}>Quay lại</Button>
+        <Title level={4}>Tutor not found</Title>
+        <Button onClick={() => navigate(-1)}>Back</Button>
       </Card>
     );
   }
@@ -81,7 +78,7 @@ const TutorProfilePage: React.FC = () => {
         onClick={() => navigate(-1)}
         style={{ marginBottom: 16 }}
       >
-        Quay lại
+        Back
       </Button>
 
       <Row gutter={24}>
@@ -94,6 +91,7 @@ const TutorProfilePage: React.FC = () => {
             <Avatar 
               size={120} 
               src={tutor.avatarUrl} 
+              icon={<UserOutlined />}
               style={{ backgroundColor: '#7132f5', marginBottom: 16 }}
             />
             <Title level={3} style={{ margin: '0 0 8px' }}>
@@ -102,7 +100,7 @@ const TutorProfilePage: React.FC = () => {
             
             <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 16 }}>
               <Tag color={tutor.status === 'Approved' ? 'success' : 'warning'}>
-                {tutor.status === 'Approved' ? 'Đã xác minh' : 'Chờ duyệt'}
+                {tutor.status === 'Approved' ? 'Verified' : 'Pending approval'}
               </Tag>
             </div>
 
@@ -115,7 +113,7 @@ const TutorProfilePage: React.FC = () => {
                 style={{ fontSize: 20 }}
               />
               <Text type="secondary" style={{ display: 'block', marginTop: 4 }}>
-                {averageRating.toFixed(1)} / 5 ({feedbacks.length} đánh giá)
+                {averageRating.toFixed(1)} / 5 ({feedbacks.length} reviews)
               </Text>
             </div>
 
@@ -132,19 +130,19 @@ const TutorProfilePage: React.FC = () => {
                 <div style={{ fontSize: 24, fontWeight: 700, color: '#7132f5' }}>
                   {tutor.reputationScore.toFixed(1)}
                 </div>
-                <Text type="secondary" style={{ fontSize: 12 }}>Điểm uy tín</Text>
+                <Text type="secondary" style={{ fontSize: 12 }}>Reputation Score</Text>
               </div>
               <div>
                 <div style={{ fontSize: 24, fontWeight: 700, color: '#7132f5' }}>
                   {feedbacks.length}
                 </div>
-                <Text type="secondary" style={{ fontSize: 12 }}>Đánh giá</Text>
+                <Text type="secondary" style={{ fontSize: 12 }}>Reviews</Text>
               </div>
               <div>
                 <div style={{ fontSize: 24, fontWeight: 700, color: '#7132f5' }}>
                   {tutor.subjects.length}
                 </div>
-                <Text type="secondary" style={{ fontSize: 12 }}>Môn dạy</Text>
+                <Text type="secondary" style={{ fontSize: 12 }}>Subjects</Text>
               </div>
             </div>
 
@@ -156,7 +154,7 @@ const TutorProfilePage: React.FC = () => {
               onClick={() => navigate(`/student/book/${tutor.userId}`)}
               style={{ borderRadius: 12, height: 52 }}
             >
-              Đặt lịch học
+              Book a Session
             </Button>
           </Card>
         </Col>
@@ -167,14 +165,14 @@ const TutorProfilePage: React.FC = () => {
           <Card 
             variant="borderless" 
             style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px', marginBottom: 16 }}
-            title={<span style={{ fontWeight: 600 }}>Giới thiệu</span>}
+            title={<span style={{ fontWeight: 600 }}>About</span>}
           >
             {tutor.bio ? (
               <Paragraph style={{ fontSize: 15, lineHeight: 1.8 }}>
                 {tutor.bio}
               </Paragraph>
             ) : (
-              <Text type="secondary">Gia sư chưa cập nhật thông tin giới thiệu</Text>
+              <Text type="secondary">The tutor has not added an introduction</Text>
             )}
           </Card>
 
@@ -182,14 +180,14 @@ const TutorProfilePage: React.FC = () => {
           <Card 
             variant="borderless" 
             style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px', marginBottom: 16 }}
-            title={<span style={{ fontWeight: 600 }}>Trình độ & Kinh nghiệm</span>}
+            title={<span style={{ fontWeight: 600 }}>Qualifications & Experience</span>}
           >
             {tutor.qualifications ? (
               <Paragraph style={{ fontSize: 15, lineHeight: 1.8, whiteSpace: 'pre-line' }}>
                 {tutor.qualifications}
               </Paragraph>
             ) : (
-              <Text type="secondary">Gia sư chưa cập nhật trình độ</Text>
+              <Text type="secondary">The tutor has not added qualifications</Text>
             )}
           </Card>
 
@@ -197,7 +195,7 @@ const TutorProfilePage: React.FC = () => {
           <Card 
             variant="borderless" 
             style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px', marginBottom: 16 }}
-            title={<span style={{ fontWeight: 600 }}>Môn học & Học phí</span>}
+            title={<span style={{ fontWeight: 600 }}>Subjects & Rates</span>}
           >
             {tutor.subjects.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -218,13 +216,13 @@ const TutorProfilePage: React.FC = () => {
                       <Text strong>{subject.subjectName}</Text>
                     </div>
                     <Text style={{ color: '#7132f5', fontWeight: 600, fontSize: 16 }}>
-                      {formatCurrency(subject.hourlyRate)} / giờ
+                      {formatCurrency(subject.hourlyRate)} / hour
                     </Text>
                   </div>
                 ))}
               </div>
             ) : (
-              <Text type="secondary">Chưa có môn học nào</Text>
+              <Text type="secondary">No subjects yet</Text>
             )}
           </Card>
 
@@ -232,7 +230,7 @@ const TutorProfilePage: React.FC = () => {
           <Card 
             variant="borderless" 
             style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}
-            title={<span style={{ fontWeight: 600 }}>Đánh giá từ học sinh</span>}
+            title={<span style={{ fontWeight: 600 }}>Student Reviews</span>}
           >
             {feedbacks.length > 0 ? (
               <List
@@ -267,7 +265,7 @@ const TutorProfilePage: React.FC = () => {
               <div style={{ textAlign: 'center', padding: '24px 0' }}>
                 <StarFilled style={{ fontSize: 32, color: '#9497a9', marginBottom: 8 }} />
                 <Text type="secondary" style={{ display: 'block' }}>
-                  Chưa có đánh giá nào
+                  No reviews yet
                 </Text>
               </div>
             )}
