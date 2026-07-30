@@ -28,7 +28,7 @@ const TutorApprovals: React.FC = () => {
       setTutors(data);
     } catch (error) {
       console.error('Failed to fetch tutors:', error);
-      message.error('Không thể tải danh sách gia sư');
+      message.error('Unable to load tutors');
     } finally {
       setLoading(false);
     }
@@ -40,12 +40,12 @@ const TutorApprovals: React.FC = () => {
     setSubmitting(true);
     try {
       await adminService.approveTutor(selectedTutor.id);
-      message.success('Duyệt gia sư thành công!');
+      message.success('Tutor approved successfully!');
       setModalVisible(false);
       setSelectedTutor(null);
       fetchTutors();
     } catch (error: any) {
-      message.error(error.response?.data?.message || 'Không thể duyệt gia sư');
+      message.error(error.response?.data?.message || 'Unable to approve the tutor');
     } finally {
       setSubmitting(false);
     }
@@ -53,20 +53,20 @@ const TutorApprovals: React.FC = () => {
 
   const handleReject = async () => {
     if (!selectedTutor || !rejectReason.trim()) {
-      message.warning('Vui lòng nhập lý do từ chối');
+      message.warning('Please enter a rejection reason');
       return;
     }
 
     setSubmitting(true);
     try {
       await adminService.rejectTutor(selectedTutor.id, rejectReason);
-      message.success('Từ chối gia sư thành công!');
+      message.success('Tutor rejected successfully!');
       setModalVisible(false);
       setSelectedTutor(null);
       setRejectReason('');
       fetchTutors();
     } catch (error: any) {
-      message.error(error.response?.data?.message || 'Không thể từ chối gia sư');
+      message.error(error.response?.data?.message || 'Unable to reject the tutor');
     } finally {
       setSubmitting(false);
     }
@@ -80,7 +80,7 @@ const TutorApprovals: React.FC = () => {
 
   const columns = [
     {
-      title: 'Gia sư',
+      title: 'Tutor',
       dataIndex: 'fullName',
       key: 'fullName',
       render: (text: string, record: TutorProfile) => (
@@ -105,27 +105,27 @@ const TutorApprovals: React.FC = () => {
       key: 'bio',
       render: (bio: string) => (
         <Text type="secondary" ellipsis style={{ maxWidth: 200 }}>
-          {bio || 'Chưa có mô tả'}
+          {bio || 'No description'}
         </Text>
       ),
     },
     {
-      title: 'Trình độ',
+      title: 'Qualifications',
       dataIndex: 'qualifications',
       key: 'qualifications',
       render: (qualifications: string) => (
         <Text type="secondary" ellipsis style={{ maxWidth: 150 }}>
-          {qualifications?.substring(0, 50) || 'Chưa có'}...
+          {qualifications?.substring(0, 50) || 'Not provided'}...
         </Text>
       ),
     },
     {
-      title: 'Môn dạy',
+      title: 'Subjects',
       dataIndex: 'subjects',
       key: 'subjects',
       render: (subjects: TutorProfile['subjects'] = []) => (
         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-          {subjects.length === 0 && <Text type="secondary">Chưa khai báo</Text>}
+          {subjects.length === 0 && <Text type="secondary">Not provided</Text>}
           {subjects.slice(0, 2).map((s) => (
             <Tag key={s.subjectId} color="purple">{s.subjectName}</Tag>
           ))}
@@ -134,13 +134,13 @@ const TutorApprovals: React.FC = () => {
       ),
     },
     {
-      title: 'Trạng thái',
+      title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => <StatusBadge status={status} />,
     },
     {
-      title: 'Thao tác',
+      title: 'Actions',
       key: 'action',
       render: (_: any, record: TutorProfile) => (
         <div style={{ display: 'flex', gap: 8 }}>
@@ -151,7 +151,7 @@ const TutorApprovals: React.FC = () => {
             style={{ backgroundColor: '#149e61', borderColor: '#149e61' }}
             onClick={() => openModal(record, 'approve')}
           >
-            Duyệt
+            Approve
           </Button>
           <Button 
             danger
@@ -159,7 +159,7 @@ const TutorApprovals: React.FC = () => {
             size="small"
             onClick={() => openModal(record, 'reject')}
           >
-            Từ chối
+            Reject
           </Button>
         </div>
       ),
@@ -174,9 +174,9 @@ const TutorApprovals: React.FC = () => {
     <div>
       <div style={{ marginBottom: 24 }}>
         <Title level={2} style={{ margin: 0, fontWeight: 700, color: '#101114' }}>
-          Duyệt gia sư
+          Tutor Approvals
         </Title>
-        <Text type="secondary">Xem xét và duyệt hồ sơ gia sư mới</Text>
+        <Text type="secondary">Review and approve new tutor profiles</Text>
       </div>
 
       <Card 
@@ -189,15 +189,16 @@ const TutorApprovals: React.FC = () => {
             columns={columns}
             rowKey="id"
             pagination={{ pageSize: 10 }}
+            scroll={{ x: 1050 }}
           />
         ) : (
-          <Empty description="Không có hồ sơ gia sư nào đang chờ duyệt" />
+          <Empty description="There are no tutor profiles awaiting approval" />
         )}
       </Card>
 
       {/* Approval Modal */}
       <Modal
-        title={actionType === 'approve' ? 'Duyệt gia sư' : 'Từ chối gia sư'}
+        title={actionType === 'approve' ? 'Approve Tutor' : 'Reject Tutor'}
         open={modalVisible}
         onCancel={() => {
           setModalVisible(false);
@@ -233,20 +234,20 @@ const TutorApprovals: React.FC = () => {
 
             {actionType === 'approve' ? (
               <>
-                <Text>Bạn có chắc muốn duyệt hồ sơ gia sư này?</Text>
+                <Text>Are you sure you want to approve this tutor profile?</Text>
                 <div style={{ marginTop: 16 }}>
                   <Text type="secondary">Bio:</Text>
                   <Paragraph style={{ marginTop: 4 }}>
-                    {selectedTutor.bio || 'Chưa có mô tả'}
+                    {selectedTutor.bio || 'No description'}
                   </Paragraph>
                 </div>
               </>
             ) : (
               <>
-                <Text>Nhập lý do từ chối:</Text>
+                <Text>Enter a rejection reason:</Text>
                 <TextArea
                   rows={3}
-                  placeholder="Nhập lý do từ chối..."
+                  placeholder="Enter a rejection reason..."
                   value={rejectReason}
                   onChange={(e) => setRejectReason(e.target.value)}
                   style={{ marginTop: 8 }}
@@ -255,7 +256,7 @@ const TutorApprovals: React.FC = () => {
             )}
 
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 24 }}>
-              <Button onClick={() => setModalVisible(false)}>Hủy</Button>
+              <Button onClick={() => setModalVisible(false)}>Cancel</Button>
               <Button 
                 type="primary" 
                 loading={submitting}
@@ -265,7 +266,7 @@ const TutorApprovals: React.FC = () => {
                 }}
                 onClick={actionType === 'approve' ? handleApprove : handleReject}
               >
-                {actionType === 'approve' ? 'Duyệt' : 'Từ chối'}
+                {actionType === 'approve' ? 'Approve' : 'Reject'}
               </Button>
             </div>
           </div>
