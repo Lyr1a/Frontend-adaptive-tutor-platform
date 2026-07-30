@@ -6,7 +6,7 @@ import {
   CalendarOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
-  DollarOutlined,
+  StarOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
@@ -76,9 +76,9 @@ const AdminDashboard: React.FC = () => {
     <div>
       <div style={{ marginBottom: 24 }}>
         <Title level={2} style={{ margin: 0, fontWeight: 700, color: '#101114' }}>
-          Tổng quan hệ thống
+          System Dashboard
         </Title>
-        <Text type="secondary">Xem nhanh tình trạng hoạt động của nền tảng</Text>
+        <Text type="secondary">View a summary of platform activity</Text>
       </div>
 
       {/* Stats Cards */}
@@ -86,7 +86,7 @@ const AdminDashboard: React.FC = () => {
         <Col xs={12} sm={6}>
           <Card variant="borderless" style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}>
             <Statistic
-              title={<Text type="secondary">Người dùng</Text>}
+              title={<Text type="secondary">Total Users</Text>}
               value={stats.totalUsers}
               prefix={<TeamOutlined style={{ color: '#7132f5' }} />}
               valueStyle={{ color: '#101114', fontWeight: 700 }}
@@ -96,7 +96,7 @@ const AdminDashboard: React.FC = () => {
         <Col xs={12} sm={6}>
           <Card variant="borderless" style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}>
             <Statistic
-              title={<Text type="secondary">Gia sư</Text>}
+              title={<Text type="secondary">Total Tutors</Text>}
               value={stats.totalTutors}
               prefix={<UserOutlined style={{ color: '#7132f5' }} />}
               valueStyle={{ color: '#101114', fontWeight: 700 }}
@@ -106,7 +106,7 @@ const AdminDashboard: React.FC = () => {
         <Col xs={12} sm={6}>
           <Card variant="borderless" style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}>
             <Statistic
-              title={<Text type="secondary">Học sinh</Text>}
+              title={<Text type="secondary">Total Students</Text>}
               value={stats.totalStudents}
               prefix={<TeamOutlined style={{ color: '#149e61' }} />}
               valueStyle={{ color: '#149e61', fontWeight: 700 }}
@@ -116,7 +116,7 @@ const AdminDashboard: React.FC = () => {
         <Col xs={12} sm={6}>
           <Card variant="borderless" style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}>
             <Statistic
-              title={<Text type="secondary">Tổng buổi học</Text>}
+              title={<Text type="secondary">Total Sessions</Text>}
               value={stats.totalSessions}
               prefix={<CalendarOutlined style={{ color: '#7132f5' }} />}
               valueStyle={{ color: '#101114', fontWeight: 700 }}
@@ -131,7 +131,7 @@ const AdminDashboard: React.FC = () => {
           <Card 
             variant="borderless" 
             style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}
-            title={<span style={{ fontWeight: 600 }}>Tình trạng buổi học</span>}
+            title={<span style={{ fontWeight: 600 }}>Session Status</span>}
           >
             <Row gutter={[16, 16]}>
               <Col span={8}>
@@ -139,7 +139,7 @@ const AdminDashboard: React.FC = () => {
                   <div style={{ fontSize: 28, fontWeight: 700, color: '#149e61' }}>
                     {stats.completedSessions}
                   </div>
-                  <Text type="secondary" style={{ fontSize: 12 }}>Hoàn thành</Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>Completed</Text>
                 </div>
               </Col>
               <Col span={8}>
@@ -147,7 +147,7 @@ const AdminDashboard: React.FC = () => {
                   <div style={{ fontSize: 28, fontWeight: 700, color: '#7132f5' }}>
                     {stats.pendingSessions}
                   </div>
-                  <Text type="secondary" style={{ fontSize: 12 }}>Đang chờ</Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>Pending</Text>
                 </div>
               </Col>
               <Col span={8}>
@@ -155,7 +155,7 @@ const AdminDashboard: React.FC = () => {
                   <div style={{ fontSize: 28, fontWeight: 700, color: '#dc2626' }}>
                     {stats.cancelledSessions}
                   </div>
-                  <Text type="secondary" style={{ fontSize: 12 }}>Đã hủy</Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>Cancelled</Text>
                 </div>
               </Col>
             </Row>
@@ -167,7 +167,7 @@ const AdminDashboard: React.FC = () => {
           <Card 
             variant="borderless" 
             style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}
-            title={<span style={{ fontWeight: 600 }}>Cần xử lý</span>}
+            title={<span style={{ fontWeight: 600 }}>Requires Attention</span>}
           >
             <Row gutter={[16, 16]}>
               <Col span={8}>
@@ -187,7 +187,7 @@ const AdminDashboard: React.FC = () => {
                         <UserOutlined style={{ fontSize: 20, color: '#7132f5' }} />
                       </div>
                     </Badge>
-                    <Text style={{ display: 'block', fontSize: 12 }}>Duyệt gia sư</Text>
+                    <Text style={{ display: 'block', fontSize: 12 }}>Tutor Approvals</Text>
                   </div>
                 </Link>
               </Col>
@@ -205,10 +205,10 @@ const AdminDashboard: React.FC = () => {
                         justifyContent: 'center',
                         margin: '0 auto 8px',
                       }}>
-                        <DollarOutlined style={{ fontSize: 20, color: '#149e61' }} />
+                        <StarOutlined style={{ fontSize: 20, color: '#149e61' }} />
                       </div>
                     </Badge>
-                    <Text style={{ display: 'block', fontSize: 12 }}>Nạp tiền</Text>
+                    <Text style={{ display: 'block', fontSize: 12 }}>Learning Credit Top-up</Text>
                   </div>
                 </Link>
               </Col>
@@ -229,7 +229,7 @@ const AdminDashboard: React.FC = () => {
                         <ExclamationCircleOutlined style={{ fontSize: 20, color: '#dc2626' }} />
                       </div>
                     </Badge>
-                    <Text style={{ display: 'block', fontSize: 12 }}>Khiếu nại</Text>
+                    <Text style={{ display: 'block', fontSize: 12 }}>Complaints</Text>
                   </div>
                 </Link>
               </Col>
@@ -244,7 +244,7 @@ const AdminDashboard: React.FC = () => {
           <Card 
             variant="borderless" 
             style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}
-            title={<span style={{ fontWeight: 600 }}>Top môn học</span>}
+            title={<span style={{ fontWeight: 600 }}>Top Subjects</span>}
           >
             {stats.topSubjects && stats.topSubjects.length > 0 ? (
               <List
@@ -267,14 +267,14 @@ const AdminDashboard: React.FC = () => {
                         {index + 1}
                       </div>
                       <Text strong style={{ flex: 1 }}>{item.name}</Text>
-                      <Text type="secondary">{item.count} buổi học</Text>
+                      <Text type="secondary">{item.count} sessions</Text>
                     </div>
                   </List.Item>
                 )}
               />
             ) : (
               <div style={{ textAlign: 'center', padding: 24 }}>
-                <Text type="secondary">Chưa có dữ liệu</Text>
+                <Text type="secondary">No data yet</Text>
               </div>
             )}
           </Card>
@@ -285,7 +285,7 @@ const AdminDashboard: React.FC = () => {
           <Card 
             variant="borderless" 
             style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}
-            title={<span style={{ fontWeight: 600 }}>Buổi học gần đây</span>}
+            title={<span style={{ fontWeight: 600 }}>Recent Sessions</span>}
           >
             {stats.recentSessions && stats.recentSessions.length > 0 ? (
               <List
@@ -307,7 +307,7 @@ const AdminDashboard: React.FC = () => {
                       <div style={{ textAlign: 'right' }}>
                         <StatusBadge status={session.status} size="small" />
                         <Text type="secondary" style={{ display: 'block', fontSize: 12 }}>
-                          {dayjs(session.startTime).format('DD/MM/YYYY')}
+                          {dayjs(session.startTime).format('MMM D, YYYY')}
                         </Text>
                       </div>
                     </div>
@@ -316,7 +316,7 @@ const AdminDashboard: React.FC = () => {
               />
             ) : (
               <div style={{ textAlign: 'center', padding: 24 }}>
-                <Text type="secondary">Chưa có buổi học nào</Text>
+                <Text type="secondary">No sessions yet</Text>
               </div>
             )}
           </Card>
