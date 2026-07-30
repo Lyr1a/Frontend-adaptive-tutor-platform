@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Typography, Row, Col, Statistic, Table, InputNumber, Button, Modal, message, Alert } from 'antd';
+import { Card, Typography, Row, Col, Statistic, Table, InputNumber, Input, Button, Modal, message, Alert } from 'antd';
 import { WalletOutlined, LoadingOutlined, HistoryOutlined } from '@ant-design/icons';
 import { creditService } from '../../services';
 import { Loading } from '../../components/common';
 import type { CreditTransaction } from '../../types';
-import { formatCurrency, formatDateTime } from '../../utils';
+import { formatCurrency, formatDateTime, fromLearningCredits } from '../../utils';
 
 const { Title, Text } = Typography;
 
@@ -13,7 +13,7 @@ const Wallet: React.FC = () => {
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [depositModalVisible, setDepositModalVisible] = useState(false);
-  const [amount, setAmount] = useState<number>(100000);
+  const [amount, setAmount] = useState<number>(100);
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -31,28 +31,28 @@ const Wallet: React.FC = () => {
       setTransactions(transactionsData);
     } catch (error) {
       console.error('Failed to fetch wallet data:', error);
-      message.error('Không thể tải thông tin ví');
+      message.error('Unable to load wallet information');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeposit = async () => {
-    if (amount < 10000) {
-      message.error('Số tiền nạp tối thiểu là 10,000 VNĐ');
+    if (amount < 10) {
+      message.error('The minimum top-up is 10 Learning Credits');
       return;
     }
 
     setSubmitting(true);
     try {
-      await creditService.deposit({ amount, note });
-      message.success('Yêu cầu nạp tiền đã được gửi! Vui lòng chờ admin duyệt.');
+      await creditService.deposit({ amount: fromLearningCredits(amount), note });
+      message.success('Your Learning Credit request has been submitted. Please wait for administrator approval.');
       setDepositModalVisible(false);
-      setAmount(100000);
+      setAmount(100);
       setNote('');
       fetchData();
     } catch (error) {
-      message.error('Không thể gửi yêu cầu nạp tiền');
+      message.error('Unable to submit the Learning Credit request');
     } finally {
       setSubmitting(false);
     }
@@ -60,21 +60,21 @@ const Wallet: React.FC = () => {
 
   const columns = [
     {
-      title: 'Ngày',
+      title: 'Date',
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (date: string) => formatDateTime(date),
     },
     {
-      title: 'Loại',
+      title: 'Type',
       dataIndex: 'type',
       key: 'type',
       render: (type: string) => {
         const typeMap: Record<string, { color: string; label: string }> = {
-          Deposit: { color: 'green', label: 'Nạp tiền' },
-          SessionFee: { color: 'purple', label: 'Phí buổi học' },
-          LateCancellationFee: { color: 'red', label: 'Phí hủy muộn' },
-          Refund: { color: 'blue', label: 'Hoàn tiền' },
+          Deposit: { color: 'green', label: 'Learning Credit Top-up' },
+          SessionFee: { color: 'purple', label: 'Session Fee' },
+          LateCancellationFee: { color: 'red', label: 'Late Cancellation Fee' },
+          Refund: { color: 'blue', label: 'Refund' },
         };
         const config = typeMap[type] || { color: 'default', label: type };
         return <span style={{
@@ -96,7 +96,7 @@ const Wallet: React.FC = () => {
       },
     },
     {
-      title: 'Số tiền',
+      title: 'Learning Credits',
       dataIndex: 'amount',
       key: 'amount',
       render: (amount: number, record: CreditTransaction) => {
@@ -109,7 +109,7 @@ const Wallet: React.FC = () => {
       },
     },
     {
-      title: 'Mô tả',
+      title: 'Description',
       dataIndex: 'description',
       key: 'description',
       render: (desc: string) => desc || '-',
@@ -124,9 +124,9 @@ const Wallet: React.FC = () => {
     <div>
       <div style={{ marginBottom: 24 }}>
         <Title level={2} style={{ margin: 0, fontWeight: 700, color: '#101114' }}>
-          Ví Credit
+          Learning Credit Wallet
         </Title>
-        <Text type="secondary">Quản lý số dư và lịch sử giao dịch</Text>
+        <Text type="secondary">Manage your balance and transaction history</Text>
       </div>
 
       {/* Balance Cards */}
@@ -141,7 +141,7 @@ const Wallet: React.FC = () => {
             }}
           >
             <Statistic
-              title={<span style={{ color: 'rgba(255,255,255,0.8)' }}>Số dư hiện tại</span>}
+              title={<span style={{ color: 'rgba(255,255,255,0.8)' }}>Current Learning Credit Balance</span>}
               value={balance}
               precision={0}
               prefix={<WalletOutlined style={{ color: '#fff' }} />}
@@ -157,9 +157,9 @@ const Wallet: React.FC = () => {
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%' }}>
               <div>
-                <Text type="secondary">Nạp thêm Credit</Text>
+                <Text type="secondary">Add Learning Credits</Text>
                 <Title level={4} style={{ margin: '4px 0 0' }}>
-                  Bắt đầu từ 10,000đ
+                  Starting from 10 Credits
                 </Title>
               </div>
               <Button 
@@ -169,7 +169,7 @@ const Wallet: React.FC = () => {
                 onClick={() => setDepositModalVisible(true)}
                 style={{ borderRadius: 12 }}
               >
-                Nạp ngay
+                Top Up Now
               </Button>
             </div>
           </Card>
@@ -182,7 +182,7 @@ const Wallet: React.FC = () => {
         style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}
         title={
           <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <HistoryOutlined /> Lịch sử giao dịch
+            <HistoryOutlined /> Transaction History
           </span>
         }
       >
@@ -191,31 +191,32 @@ const Wallet: React.FC = () => {
           columns={columns}
           rowKey="id"
           pagination={{ pageSize: 10 }}
-          locale={{ emptyText: 'Chưa có giao dịch nào' }}
+          scroll={{ x: 720 }}
+          locale={{ emptyText: 'No transactions yet' }}
         />
       </Card>
 
       {/* Deposit Modal */}
       <Modal
-        title="Nạp Credit"
+        title="Learning Credit Top-up"
         open={depositModalVisible}
         onCancel={() => setDepositModalVisible(false)}
         footer={null}
       >
         <div style={{ padding: '16px 0' }}>
           <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
-            Nhập số tiền bạn muốn nạp. Yêu cầu sẽ được gửi đến admin để duyệt.
+            Enter the number of Learning Credits you want to add. Your request will be sent to an administrator for approval.
           </Text>
 
           <div style={{ marginBottom: 16 }}>
             <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
-              Số tiền (VNĐ)
+              Learning Credits
             </label>
             <InputNumber
               style={{ width: '100%' }}
               size="large"
-              min={10000}
-              step={10000}
+              min={10}
+              step={10}
               value={amount}
               onChange={(value) => setAmount(value || 0)}
               formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
@@ -225,34 +226,37 @@ const Wallet: React.FC = () => {
 
           <div style={{ marginBottom: 16 }}>
             <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
-              Ghi chú (tùy chọn)
+              Note (optional)
             </label>
-            <InputNumber
+            <Input.TextArea
               style={{ width: '100%' }}
               size="large"
-              placeholder="Nội dung chuyển khoản hoặc ghi chú..."
+              rows={3}
+              maxLength={300}
+              showCount
+              placeholder="Payment reference or note..."
               value={note}
-              onChange={(value) => setNote(value?.toString() || '')}
+              onChange={(event) => setNote(event.target.value)}
             />
           </div>
 
           <Alert
-            message="Lưu ý"
-            description="Sau khi gửi yêu cầu, vui lòng chờ admin xác nhận. Credit sẽ được cộng vào tài khoản sau khi được duyệt."
+            message="Note"
+            description="After submitting, please wait for administrator confirmation. Learning Credits will be added after approval."
             type="info"
             showIcon
             style={{ marginBottom: 16 }}
           />
 
           <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-            <Button onClick={() => setDepositModalVisible(false)}>Hủy</Button>
+            <Button onClick={() => setDepositModalVisible(false)}>Cancel</Button>
             <Button 
               type="primary" 
               loading={submitting}
               onClick={handleDeposit}
-              disabled={amount < 10000}
+              disabled={amount < 10}
             >
-              Gửi yêu cầu
+              Submit request
             </Button>
           </div>
         </div>
