@@ -9,12 +9,19 @@ export const creditService = {
   },
 
   getBalance: async (): Promise<number> => {
-    const response = await api.get<number>(API_ENDPOINTS.balance);
-    return response.data;
+    const response = await api.get<number | { balance?: number; Balance?: number }>(
+      API_ENDPOINTS.balance
+    );
+
+    if (typeof response.data === 'number') {
+      return response.data;
+    }
+
+    return Number(response.data.balance ?? response.data.Balance ?? 0);
   },
 
   getTransactions: async (): Promise<CreditTransaction[]> => {
-    const response = await api.get<CreditTransaction[]>(API_ENDPOINTS.transactions);
-    return response.data;
+    const response = await api.get<CreditTransaction[] | null>(API_ENDPOINTS.transactions);
+    return response.data ?? [];
   },
 };
