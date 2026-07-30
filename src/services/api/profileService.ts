@@ -24,13 +24,26 @@ interface TutorSubjectData {
 
 export const profileService = {
   getMe: async (): Promise<User> => {
-    const response = await api.get<User>(API_ENDPOINTS.myProfile);
-    return response.data;
+    const response = await api.get<User & { userId?: number }>(API_ENDPOINTS.myProfile);
+    const profile = response.data;
+    const normalizedProfile = {
+      ...profile,
+      id: profile.id ?? profile.userId ?? 0,
+      creditBalance: profile.creditBalance ?? 0,
+      isSuspended: profile.isSuspended ?? false,
+      status:
+        (profile as User & { tutorStatus?: string }).tutorStatus ??
+        (profile as User & { status?: string }).status,
+      reputationScore: (profile as User & { reputationScore?: number }).reputationScore ?? 0,
+    };
+    return normalizedProfile;
   },
 
   updateMe: async (data: UpdateProfileData): Promise<User> => {
-    const response = await api.put<User>(API_ENDPOINTS.updateProfile, data);
-    return response.data;
+    const formData = new FormData();
+    formData.append('fullName', data.fullName ?? '');
+    await api.put(API_ENDPOINTS.updateProfile, formData);
+    return profileService.getMe();
   },
 
   updateStudentProfile: async (data: UpdateStudentData): Promise<StudentProfile> => {
@@ -39,17 +52,21 @@ export const profileService = {
   },
 
   updateTutorProfile: async (data: UpdateTutorData): Promise<TutorProfile> => {
-    const response = await api.put<TutorProfile>(API_ENDPOINTS.updateTutorProfile, data);
-    return response.data;
+    const formData = new FormData();
+    if (data.bio !== undefined) formData.append('bio', data.bio);
+    if (data.qualifications !== undefined) {
+      formData.append('qualificationsText', data.qualifications);
+    }
+    await api.put(API_ENDPOINTS.updateTutorProfile, formData);
+    return {} as TutorProfile;
   },
 
   setTutorSubjects: async (subjects: TutorSubjectData[]): Promise<void> => {
-    await api.post(
-      API_ENDPOINTS.tutorSubjects,
-      subjects.map(subject => ({
+    await api.post(API_ENDPOINTS.tutorSubjects, {
+      subjects: subjects.map(subject => ({
         subjectId: subject.subjectId,
         rate: subject.hourlyRate,
-      }))
-    );
+      })),
+    });
   },
 };

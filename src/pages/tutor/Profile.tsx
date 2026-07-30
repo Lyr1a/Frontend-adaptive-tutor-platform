@@ -5,6 +5,7 @@ import { useAuthStore } from '../../stores';
 import { profileService, subjectService } from '../../services';
 import { Loading } from '../../components/common';
 import type { Subject } from '../../types';
+import { formatCurrency, fromLearningCredits } from '../../utils';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -57,15 +58,15 @@ const TutorProfilePage: React.FC = () => {
       }
       setSelectedSubjects(
         (Array.isArray(existingSubjects) ? existingSubjects : []).map((s: any) => ({
-          subjectId: s.subjectId,
-          hourlyRate: s.hourlyRate ?? s.rate ?? 0,
+          subjectId: s.subjectId ?? s.SubjectId,
+          hourlyRate: s.hourlyRate ?? s.rate ?? s.Rate ?? 0,
         }))
       );
 
       setInitialLoading(false);
     } catch (error) {
       console.error('Failed to fetch data:', error);
-      message.error('Không thể tải thông tin');
+      message.error('Unable to load information');
       setInitialLoading(false);
     }
   };
@@ -82,10 +83,10 @@ const TutorProfilePage: React.FC = () => {
         await profileService.updateMe({ fullName: values.fullName });
       }
       
-      message.success('Cập nhật hồ sơ thành công!');
+      message.success('Profile updated successfully!');
       fetchData();
     } catch (error) {
-      message.error('Không thể cập nhật hồ sơ');
+      message.error('Unable to update profile');
     } finally {
       setLoading(false);
     }
@@ -93,11 +94,14 @@ const TutorProfilePage: React.FC = () => {
 
   const handleAddSubject = async (values: { subjectId: number; hourlyRate: number }) => {
     if (selectedSubjects.find(s => s.subjectId === values.subjectId)) {
-      message.warning('Môn học này đã được thêm!');
+      message.warning('This subject has already been added!');
       return;
     }
 
-    setSelectedSubjects([...selectedSubjects, values]);
+    setSelectedSubjects([
+      ...selectedSubjects,
+      { ...values, hourlyRate: fromLearningCredits(values.hourlyRate) },
+    ]);
     subjectsForm.resetFields();
   };
 
@@ -107,33 +111,31 @@ const TutorProfilePage: React.FC = () => {
 
   const handleSaveSubjects = async () => {
     if (selectedSubjects.length === 0) {
-      message.warning('Vui lòng thêm ít nhất một môn học!');
+      message.warning('Please add at least one subject!');
       return;
     }
 
     setLoading(true);
     try {
       await profileService.setTutorSubjects(selectedSubjects);
-      message.success('Cập nhật môn học thành công!');
+      message.success('Subjects updated successfully!');
       fetchData();
     } catch (error) {
-      message.error('Không thể cập nhật môn học');
+      message.error('Unable to update subjects');
     } finally {
       setLoading(false);
     }
   };
 
   const getSubjectName = (id: number) => {
-    return subjects.find(s => s.id === id)?.name || 'Unknown';
+    return subjects.find(s => s.id === id)?.name || `Subject #${id}`;
   };
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-      minimumFractionDigits: 0,
-    }).format(value);
-  };
+  const statusConfig = profile?.status === 'Approved'
+    ? { label: 'Verified', color: '#149e61', background: 'rgba(20, 154, 97, 0.08)' }
+    : profile?.status === 'Rejected'
+      ? { label: 'Rejected', color: '#dc2626', background: 'rgba(220, 38, 38, 0.08)' }
+      : { label: 'Pending approval', color: '#d97706', background: 'rgba(217, 119, 6, 0.08)' };
 
   if (initialLoading) {
     return <Loading fullPage />;
@@ -143,17 +145,26 @@ const TutorProfilePage: React.FC = () => {
     <div>
       <div style={{ marginBottom: 24 }}>
         <Title level={2} style={{ margin: 0, fontWeight: 700, color: '#101114' }}>
-          Hồ sơ gia sư
+          Tutor Profile
         </Title>
-        <Text type="secondary">Quản lý thông tin và môn học của bạn</Text>
+        <Text type="secondary">Manage your profile and teaching subjects</Text>
       </div>
 
       {/* Profile Status Alert */}
-      {profile?.status !== 'Approved' && (
+      {profile?.status === 'Pending' && (
         <Alert
-          message="Hồ sơ đang chờ duyệt"
-          description="Hồ sơ của bạn đang được admin xem xét. Sau khi được duyệt, bạn sẽ có thể nhận dạy."
+          message="Profile awaiting approval"
+          description="Your profile is being reviewed by an administrator. You can accept sessions after approval."
           type="warning"
+          showIcon
+          style={{ marginBottom: 24 }}
+        />
+      )}
+      {profile?.status === 'Rejected' && (
+        <Alert
+          message="Profile not approved"
+          description="Please update your qualifications or teaching subjects and resubmit your profile for review."
+          type="error"
           showIcon
           style={{ marginBottom: 24 }}
         />
@@ -183,26 +194,24 @@ const TutorProfilePage: React.FC = () => {
             <div style={{
               display: 'inline-block',
               padding: '4px 12px',
-              backgroundColor: profile?.status === 'Approved' 
-                ? 'rgba(20, 154, 97, 0.08)' 
-                : 'rgba(217, 119, 6, 0.08)',
+              backgroundColor: statusConfig.background,
               borderRadius: 20,
-              color: profile?.status === 'Approved' ? '#149e61' : '#d97706',
+              color: statusConfig.color,
               fontWeight: 500,
               fontSize: 13,
             }}>
-              {profile?.status === 'Approved' ? 'Đã xác minh' : 'Chờ duyệt'}
+              {statusConfig.label}
             </div>
 
             <Divider />
 
             <div style={{ textAlign: 'left' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <Text type="secondary">Điểm uy tín</Text>
+                <Text type="secondary">Reputation Score</Text>
                 <Text strong style={{ color: '#f59e0b' }}>{profile?.reputationScore?.toFixed(1) || 0}/5</Text>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Text type="secondary">Môn học</Text>
+                <Text type="secondary">Subject</Text>
                 <Text strong>{selectedSubjects.length}</Text>
               </div>
             </div>
@@ -215,7 +224,7 @@ const TutorProfilePage: React.FC = () => {
           <Card 
             variant="borderless" 
             style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px', marginBottom: 16 }}
-            title={<span style={{ fontWeight: 600 }}>Thông tin cá nhân</span>}
+            title={<span style={{ fontWeight: 600 }}>Personal Information</span>}
           >
             <Form
               form={profileForm}
@@ -223,40 +232,40 @@ const TutorProfilePage: React.FC = () => {
               onFinish={handleProfileSubmit}
             >
               <Form.Item
-                label="Họ và tên"
+                label="Full name"
                 name="fullName"
-                rules={[{ required: true, message: 'Vui lòng nhập họ và tên!' }]}
+                rules={[{ required: true, message: 'Please enter your full name!' }]}
               >
                 <Input size="large" />
               </Form.Item>
 
               <Form.Item
-                label="Giới thiệu (Bio)"
+                label="Introduction"
                 name="bio"
               >
                 <TextArea 
                   rows={4} 
-                  placeholder="Viết vài dòng giới thiệu về bản thân..." 
+                  placeholder="Write a short introduction..."
                 />
               </Form.Item>
 
               <Form.Item
-                label="Trình độ & Kinh nghiệm"
+                label="Qualifications & Experience"
                 name="qualifications"
               >
                 <TextArea 
                   rows={4} 
-                  placeholder="Mô tả trình độ học vấn, kinh nghiệm giảng dạy..." 
+                  placeholder="Describe your education and teaching experience..."
                 />
               </Form.Item>
 
               <Form.Item style={{ marginBottom: 0 }}>
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
                   <Button onClick={() => profileForm.resetFields()}>
-                    Đặt lại
+                    Reset
                   </Button>
                   <Button type="primary" htmlType="submit" loading={loading}>
-                    Lưu thay đổi
+                    Save Changes
                   </Button>
                 </div>
               </Form.Item>
@@ -267,20 +276,20 @@ const TutorProfilePage: React.FC = () => {
           <Card 
             variant="borderless" 
             style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}
-            title={<span style={{ fontWeight: 600 }}>Môn học & Học phí</span>}
+            title={<span style={{ fontWeight: 600 }}>Subjects & Rates</span>}
           >
             <Form
               form={subjectsForm}
               layout="inline"
               onFinish={handleAddSubject}
-              style={{ marginBottom: 24 }}
+              style={{ marginBottom: 24, display: 'flex', flexWrap: 'wrap', gap: 12 }}
             >
               <Form.Item
                 name="subjectId"
-                rules={[{ required: true, message: 'Chọn môn học!' }]}
-                style={{ flex: 1 }}
+                rules={[{ required: true, message: 'Select a subject!' }]}
+                style={{ flex: '1 1 240px', marginInlineEnd: 0 }}
               >
-                <Select placeholder="Chọn môn học" size="large">
+                <Select placeholder="Select a subject" size="large">
                   {subjects
                     .filter(s => !selectedSubjects.find(ss => ss.subjectId === s.id))
                     .map(subject => (
@@ -294,14 +303,14 @@ const TutorProfilePage: React.FC = () => {
 
               <Form.Item
                 name="hourlyRate"
-                rules={[{ required: true, message: 'Nhập học phí!' }]}
-                style={{ width: 180 }}
+                rules={[{ required: true, message: 'Enter a rate!' }]}
+                style={{ flex: '1 1 180px', marginInlineEnd: 0 }}
               >
                 <InputNumber 
                   size="large"
-                  placeholder="Học phí/giờ"
-                  min={10000}
-                  step={10000}
+                  placeholder="Learning Credits/hour"
+                  min={10}
+                  step={10}
                   formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                   parser={(value) => value!.replace(/,/g, '') as any}
                   style={{ width: '100%' }}
@@ -309,7 +318,7 @@ const TutorProfilePage: React.FC = () => {
               </Form.Item>
 
               <Button type="primary" htmlType="submit" size="large">
-                Thêm
+                Add
               </Button>
             </Form>
 
@@ -327,10 +336,10 @@ const TutorProfilePage: React.FC = () => {
                     borderRadius: 10,
                   }}
                 >
-                  <div>
+                  <div style={{ minWidth: 0 }}>
                     <Text strong>{getSubjectName(subject.subjectId)}</Text>
-                    <Text type="secondary" style={{ marginLeft: 16 }}>
-                      {formatCurrency(subject.hourlyRate)} / giờ
+                    <Text type="secondary" style={{ display: 'block' }}>
+                      {formatCurrency(subject.hourlyRate)} / hour
                     </Text>
                   </div>
                   <Button 
@@ -344,7 +353,7 @@ const TutorProfilePage: React.FC = () => {
               
               {selectedSubjects.length === 0 && (
                 <Text type="secondary" style={{ textAlign: 'center', padding: 16 }}>
-                  Chưa có môn học nào. Thêm môn học bên trên.
+                  No subjects yet. Add a subject above.
                 </Text>
               )}
             </div>
@@ -358,7 +367,7 @@ const TutorProfilePage: React.FC = () => {
                 onClick={handleSaveSubjects}
                 style={{ marginTop: 16, borderRadius: 10 }}
               >
-                Lưu môn học
+                Save Subjects
               </Button>
             )}
           </Card>
