@@ -30,7 +30,7 @@ const Complaints: React.FC = () => {
       setComplaints(data);
     } catch (error) {
       console.error('Failed to fetch complaints:', error);
-      message.error('Không thể tải danh sách khiếu nại');
+      message.error('Unable to load complaints');
     } finally {
       setLoading(false);
     }
@@ -38,7 +38,7 @@ const Complaints: React.FC = () => {
 
   const handleResolve = async () => {
     if (!selectedComplaint || !resolutionAction.trim()) {
-      message.warning('Vui lòng nhập hành động xử lý');
+      message.warning('Enter the resolution action');
       return;
     }
 
@@ -49,14 +49,14 @@ const Complaints: React.FC = () => {
         'Warning',
         [resolutionAction, resolutionReason].filter(Boolean).join(' — ')
       );
-      message.success('Xử lý khiếu nại thành công!');
+      message.success('Complaint resolved successfully!');
       setModalVisible(false);
       setSelectedComplaint(null);
       setResolutionAction('');
       setResolutionReason('');
       fetchComplaints();
     } catch (error) {
-      message.error('Không thể xử lý khiếu nại');
+      message.error('Unable to resolve the complaint');
     } finally {
       setSubmitting(false);
     }
@@ -64,7 +64,7 @@ const Complaints: React.FC = () => {
 
   const handleDismiss = async () => {
     if (!selectedComplaint || !resolutionReason.trim()) {
-      message.warning('Vui lòng nhập lý do bỏ qua');
+      message.warning('Enter a dismissal reason');
       return;
     }
 
@@ -75,13 +75,13 @@ const Complaints: React.FC = () => {
         'Close',
         resolutionReason
       );
-      message.success('Đã bỏ qua khiếu nại!');
+      message.success('Complaint dismissed successfully!');
       setModalVisible(false);
       setSelectedComplaint(null);
       setResolutionReason('');
       fetchComplaints();
     } catch (error) {
-      message.error('Không thể bỏ qua khiếu nại');
+      message.error('Unable to dismiss the complaint');
     } finally {
       setSubmitting(false);
     }
@@ -95,10 +95,10 @@ const Complaints: React.FC = () => {
 
   const getComplaintTypeLabel = (type: ComplaintType) => {
     const labels: Record<ComplaintType, string> = {
-      LateCancellation: 'Hủy muộn',
-      InappropriateBehavior: 'Hành vi không phù hợp',
-      SessionResultDispute: 'Tranh chấp kết quả',
-      Other: 'Khác',
+      LateCancellation: 'Late Cancellation',
+      InappropriateBehavior: 'Inappropriate Behavior',
+      SessionResultDispute: 'Session Result Dispute',
+      Other: 'Fairc',
     };
     return labels[type] || type;
   };
@@ -115,7 +115,7 @@ const Complaints: React.FC = () => {
 
   const columns = [
     {
-      title: 'Người khiếu nại',
+      title: 'Complainant',
       dataIndex: 'reporterName',
       key: 'reporterName',
       render: (text: string) => (
@@ -126,7 +126,7 @@ const Complaints: React.FC = () => {
       ),
     },
     {
-      title: 'Người bị khiếu nại',
+      title: 'Respondent',
       dataIndex: 'reportedUserName',
       key: 'reportedUserName',
       render: (text: string) => (
@@ -137,7 +137,7 @@ const Complaints: React.FC = () => {
       ),
     },
     {
-      title: 'Loại',
+      title: 'Type',
       dataIndex: 'type',
       key: 'type',
       render: (type: ComplaintType) => (
@@ -145,7 +145,7 @@ const Complaints: React.FC = () => {
       ),
     },
     {
-      title: 'Mô tả',
+      title: 'Description',
       dataIndex: 'description',
       key: 'description',
       render: (text: string) => (
@@ -155,19 +155,19 @@ const Complaints: React.FC = () => {
       ),
     },
     {
-      title: 'Ngày',
+      title: 'Date',
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (date: string) => formatDateTime(date),
     },
     {
-      title: 'Trạng thái',
+      title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => <StatusBadge status={status} />,
     },
     {
-      title: 'Thao tác',
+      title: 'Actions',
       key: 'action',
       render: (_: any, record: Complaint) => (
         <div style={{ display: 'flex', gap: 8 }}>
@@ -178,7 +178,7 @@ const Complaints: React.FC = () => {
             style={{ backgroundColor: '#149e61', borderColor: '#149e61' }}
             onClick={() => openModal(record, 'resolve')}
           >
-            Xử lý
+            Resolve
           </Button>
           <Button 
             danger
@@ -186,7 +186,7 @@ const Complaints: React.FC = () => {
             size="small"
             onClick={() => openModal(record, 'dismiss')}
           >
-            Bỏ qua
+            Dismiss
           </Button>
         </div>
       ),
@@ -201,9 +201,9 @@ const Complaints: React.FC = () => {
     <div>
       <div style={{ marginBottom: 24 }}>
         <Title level={2} style={{ margin: 0, fontWeight: 700, color: '#101114' }}>
-          Khiếu nại
+          Complaints
         </Title>
-        <Text type="secondary">Xem xét và xử lý các khiếu nại từ người dùng</Text>
+        <Text type="secondary">Review and resolve user complaints</Text>
       </div>
 
       <Card 
@@ -216,15 +216,16 @@ const Complaints: React.FC = () => {
             columns={columns}
             rowKey="id"
             pagination={{ pageSize: 10 }}
+            scroll={{ x: 1000 }}
           />
         ) : (
-          <Empty description="Không có khiếu nại nào đang chờ xử lý" />
+          <Empty description="There are no complaints awaiting review" />
         )}
       </Card>
 
       {/* Resolve Modal */}
       <Modal
-        title={actionType === 'resolve' ? 'Xử lý khiếu nại' : 'Bỏ qua khiếu nại'}
+        title={actionType === 'resolve' ? 'Resolve Complaint' : 'Dismiss Complaint'}
         open={modalVisible}
         onCancel={() => {
           setModalVisible(false);
@@ -244,11 +245,11 @@ const Complaints: React.FC = () => {
             }}>
               <div style={{ display: 'flex', gap: 16, marginBottom: 12 }}>
                 <div>
-                  <Text type="secondary" style={{ fontSize: 12 }}>Người khiếu nại</Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>Complainant</Text>
                   <Text strong style={{ display: 'block' }}>{selectedComplaint.reporterName}</Text>
                 </div>
                 <div>
-                  <Text type="secondary" style={{ fontSize: 12 }}>Người bị khiếu nại</Text>
+                  <Text type="secondary" style={{ fontSize: 12 }}>Respondent</Text>
                   <Text strong style={{ display: 'block' }}>{selectedComplaint.reportedUserName}</Text>
                 </div>
               </div>
@@ -257,19 +258,19 @@ const Complaints: React.FC = () => {
                   {getComplaintTypeLabel(selectedComplaint.type)}
                 </Tag>
               </div>
-              <Text type="secondary">Mô tả:</Text>
+              <Text type="secondary">Description:</Text>
               <p style={{ margin: '4px 0 0' }}>{selectedComplaint.description}</p>
             </div>
 
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
-                {actionType === 'resolve' ? 'Hành động xử lý' : 'Lý do bỏ qua'} <span style={{ color: '#dc2626' }}>*</span>
+                {actionType === 'resolve' ? 'Resolution Action' : 'Dismissal Reason'} <span style={{ color: '#dc2626' }}>*</span>
               </label>
               <TextArea
                 rows={3}
                 placeholder={actionType === 'resolve' 
-                  ? 'Mô tả hành động bạn sẽ thực hiện...' 
-                  : 'Nhập lý do bỏ qua khiếu nại...'}
+                  ? 'Describe the action you will take...'
+                  : 'Enter a reason for dismissing the complaint...'}
                 value={actionType === 'resolve' ? resolutionAction : resolutionReason}
                 onChange={(e) => {
                   if (actionType === 'resolve') {
@@ -284,11 +285,11 @@ const Complaints: React.FC = () => {
             {actionType === 'resolve' && (
               <div>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>
-                  Ghi chú thêm
+                  Additional Notes
                 </label>
                 <TextArea
                   rows={2}
-                  placeholder="Ghi chú thêm (tùy chọn)..."
+                  placeholder="Additional notes (optional)..."
                   value={resolutionReason}
                   onChange={(e) => setResolutionReason(e.target.value)}
                 />
@@ -296,7 +297,7 @@ const Complaints: React.FC = () => {
             )}
 
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 24 }}>
-              <Button onClick={() => setModalVisible(false)}>Hủy</Button>
+              <Button onClick={() => setModalVisible(false)}>Cancel</Button>
               <Button 
                 type="primary" 
                 loading={submitting}
@@ -306,7 +307,7 @@ const Complaints: React.FC = () => {
                 }}
                 onClick={actionType === 'resolve' ? handleResolve : handleDismiss}
               >
-                {actionType === 'resolve' ? 'Xác nhận xử lý' : 'Bỏ qua'}
+                {actionType === 'resolve' ? 'Confirm Resolution' : 'Dismiss'}
               </Button>
             </div>
           </div>
