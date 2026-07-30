@@ -10,13 +10,62 @@ import type {
 
 export const sessionService = {
   getMySessions: async (): Promise<Session[]> => {
-    const response = await api.get<Session[]>(API_ENDPOINTS.mySessions);
-    return response.data;
+    const [sessionsResponse, subjectsResponse] = await Promise.all([
+      api.get<Array<Partial<Session>> | null>(API_ENDPOINTS.mySessions),
+      api.get<Array<{ id: number; name: string }> | null>(API_ENDPOINTS.subjects),
+    ]);
+    const subjectNames = new Map(
+      (subjectsResponse.data ?? []).map((subject) => [subject.id, subject.name])
+    );
+
+    return (sessionsResponse.data ?? []).map((session) => ({
+      id: session.id ?? 0,
+      tutorId: session.tutorId ?? 0,
+      tutorName: session.tutorName || `Tutor #${session.tutorId ?? 0}`,
+      studentId: session.studentId ?? 0,
+      studentName: session.studentName || `Student #${session.studentId ?? 0}`,
+      subjectId: session.subjectId ?? 0,
+      subjectName:
+        session.subjectName ||
+        subjectNames.get(session.subjectId ?? 0) ||
+        `Subject #${session.subjectId ?? 0}`,
+      startTime: session.startTime ?? '',
+      endTime: session.endTime ?? '',
+      meetingLink: session.meetingLink,
+      canJoin: session.canJoin ?? false,
+      status: session.status ?? 'Pending',
+      score: session.score,
+      tutorComment: session.tutorComment,
+      goalCompletionPercentage: session.goalCompletionPercentage,
+    }));
   },
 
   getById: async (id: number): Promise<Session> => {
-    const response = await api.get<Session>(API_ENDPOINTS.sessionDetails(id));
-    return response.data;
+    const [sessionResponse, subjectsResponse] = await Promise.all([
+      api.get<Partial<Session>>(API_ENDPOINTS.sessionDetails(id)),
+      api.get<Array<{ id: number; name: string }> | null>(API_ENDPOINTS.subjects),
+    ]);
+    const session = sessionResponse.data;
+    const subjectName = (subjectsResponse.data ?? []).find(
+      (subject) => subject.id === session.subjectId
+    )?.name;
+    return {
+      id: session.id ?? id,
+      tutorId: session.tutorId ?? 0,
+      tutorName: session.tutorName || `Tutor #${session.tutorId ?? 0}`,
+      studentId: session.studentId ?? 0,
+      studentName: session.studentName || `Student #${session.studentId ?? 0}`,
+      subjectId: session.subjectId ?? 0,
+      subjectName: session.subjectName || subjectName || `Subject #${session.subjectId ?? 0}`,
+      startTime: session.startTime ?? '',
+      endTime: session.endTime ?? '',
+      meetingLink: session.meetingLink,
+      canJoin: session.canJoin ?? false,
+      status: session.status ?? 'Pending',
+      score: session.score,
+      tutorComment: session.tutorComment,
+      goalCompletionPercentage: session.goalCompletionPercentage,
+    };
   },
 
   book: async (data: BookSessionRequest): Promise<Session> => {

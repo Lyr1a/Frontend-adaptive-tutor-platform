@@ -59,10 +59,10 @@ const StudentDashboard: React.FC = () => {
       {/* Welcome Header */}
       <div style={{ marginBottom: 24 }}>
         <Title level={2} style={{ margin: 0, fontWeight: 700, color: '#101114' }}>
-          Xin chào, {user?.fullName}! 👋
+          Welcome, {user?.fullName}! 👋
         </Title>
         <Text type="secondary" style={{ fontSize: 16 }}>
-          Chào mừng bạn quay trở lại TutorMatch
+          Welcome back to TutorMatch
         </Text>
       </div>
 
@@ -71,7 +71,7 @@ const StudentDashboard: React.FC = () => {
         <Col xs={24} sm={8}>
           <Card variant="borderless" style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}>
             <Statistic
-              title={<Text type="secondary">Số dư ví</Text>}
+              title={<Text type="secondary">Learning Credit Balance</Text>}
               value={balance}
               precision={0}
               prefix={<WalletOutlined style={{ color: '#7132f5' }} />}
@@ -80,7 +80,7 @@ const StudentDashboard: React.FC = () => {
             />
             <Link to="/student/wallet">
               <Button type="link" style={{ padding: 0, color: '#7132f5' }}>
-                Nạp thêm <RightOutlined style={{ fontSize: 10 }} />
+                Add Credits <RightOutlined style={{ fontSize: 10 }} />
               </Button>
             </Link>
           </Card>
@@ -88,14 +88,14 @@ const StudentDashboard: React.FC = () => {
         <Col xs={24} sm={8}>
           <Card variant="borderless" style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}>
             <Statistic
-              title={<Text type="secondary">Tổng buổi học</Text>}
+              title={<Text type="secondary">Total Sessions</Text>}
               value={totalSessions}
               prefix={<CalendarOutlined style={{ color: '#7132f5' }} />}
               valueStyle={{ color: '#101114', fontWeight: 700 }}
             />
             <Link to="/student/sessions">
               <Button type="link" style={{ padding: 0, color: '#7132f5' }}>
-                Xem tất cả <RightOutlined style={{ fontSize: 10 }} />
+                View All <RightOutlined style={{ fontSize: 10 }} />
               </Button>
             </Link>
           </Card>
@@ -103,7 +103,7 @@ const StudentDashboard: React.FC = () => {
         <Col xs={24} sm={8}>
           <Card variant="borderless" style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}>
             <Statistic
-              title={<Text type="secondary">Buổi đã hoàn thành</Text>}
+              title={<Text type="secondary">Completed Sessions</Text>}
               value={completedSessions}
               prefix={<ClockCircleOutlined style={{ color: '#149e61' }} />}
               valueStyle={{ color: '#149e61', fontWeight: 700 }}
@@ -120,9 +120,9 @@ const StudentDashboard: React.FC = () => {
             style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}
             title={
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 600 }}>Buổi học sắp tới</span>
+                <span style={{ fontWeight: 600 }}>Upcoming Sessions</span>
                 <Link to="/student/sessions">
-                  <Button type="link" style={{ padding: 0 }}>Xem tất cả</Button>
+                  <Button type="link" style={{ padding: 0 }}>View All</Button>
                 </Link>
               </div>
             }
@@ -148,7 +148,7 @@ const StudentDashboard: React.FC = () => {
                         </Text>
                       </div>
                       <Link to={`/student/session/${session.id}`}>
-                        <Button type="primary" ghost size="small">Chi tiết</Button>
+                        <Button type="primary" ghost size="small">Details</Button>
                       </Link>
                     </div>
                   </List.Item>
@@ -158,11 +158,11 @@ const StudentDashboard: React.FC = () => {
               <div style={{ textAlign: 'center', padding: '32px 0' }}>
                 <CalendarOutlined style={{ fontSize: 48, color: '#9497a9', marginBottom: 16 }} />
                 <Text type="secondary" style={{ display: 'block' }}>
-                  Chưa có buổi học nào được đặt
+                  No sessions booked yet
                 </Text>
                 <Link to="/student/search-tutors">
                   <Button type="primary" style={{ marginTop: 16 }}>
-                    Tìm gia sư ngay
+                    Find a Tutor
                   </Button>
                 </Link>
               </div>
@@ -175,7 +175,7 @@ const StudentDashboard: React.FC = () => {
           <Card 
             variant="borderless" 
             style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}
-            title={<span style={{ fontWeight: 600 }}>Thao tác nhanh</span>}
+            title={<span style={{ fontWeight: 600 }}>Quick Actions</span>}
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <Link to="/student/search-tutors">
@@ -191,7 +191,7 @@ const StudentDashboard: React.FC = () => {
                     gap: 12,
                   }}
                 >
-                  Tìm kiếm gia sư
+                  Find Tutors
                 </Button>
               </Link>
               <Link to="/student/wallet">
@@ -207,7 +207,7 @@ const StudentDashboard: React.FC = () => {
                     gap: 12,
                   }}
                 >
-                  Nạp Credit
+                  Learning Credit Top-up
                 </Button>
               </Link>
               <Link to="/student/progress">
@@ -223,7 +223,7 @@ const StudentDashboard: React.FC = () => {
                     gap: 12,
                   }}
                 >
-                  Xem tiến độ học tập
+                  View Learning Progress
                 </Button>
               </Link>
             </div>
