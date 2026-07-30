@@ -19,7 +19,7 @@ const ForgotPasswordPage: React.FC = () => {
         setResetToken(response.resetToken);
       }
     } catch {
-      message.error('Không thể gửi yêu cầu đặt lại mật khẩu.');
+      message.error('Unable to submit the password reset request.');
     } finally {
       setLoading(false);
     }
@@ -27,18 +27,18 @@ const ForgotPasswordPage: React.FC = () => {
 
   return (
     <div>
-      <Title level={3} style={{ textAlign: 'center' }}>Quên mật khẩu</Title>
+      <Title level={3} style={{ textAlign: 'center' }}>Forgot password</Title>
       <Paragraph type="secondary" style={{ textAlign: 'center' }}>
-        Nhập email để nhận hướng dẫn đặt lại mật khẩu.
+        Enter your email to receive password reset instructions.
       </Paragraph>
       {resetToken && (
         <Alert
           type="success"
           showIcon
-          message="Đã tạo mã đặt lại mật khẩu (môi trường phát triển)."
+          message="A password reset code was generated (development environment)."
           action={
             <Button size="small" onClick={() => navigate(`/reset-password?token=${encodeURIComponent(resetToken)}`)}>
-              Tiếp tục
+              Continue
             </Button>
           }
           style={{ marginBottom: 20 }}
@@ -49,18 +49,18 @@ const ForgotPasswordPage: React.FC = () => {
           name="email"
           label="Email"
           rules={[
-            { required: true, message: 'Vui lòng nhập email.' },
-            { type: 'email', message: 'Email không hợp lệ.' },
+            { required: true, message: 'Please enter your email.' },
+            { type: 'email', message: 'Invalid email address.' },
           ]}
         >
           <Input placeholder="email@example.com" />
         </Form.Item>
         <Button type="primary" htmlType="submit" loading={loading} block>
-          Gửi yêu cầu
+          Submit request
         </Button>
       </Form>
       <Paragraph style={{ textAlign: 'center', marginTop: 20 }}>
-        <Link to="/login">Quay lại đăng nhập</Link>
+        <Link to="/login">Back to sign in</Link>
       </Paragraph>
     </div>
   );

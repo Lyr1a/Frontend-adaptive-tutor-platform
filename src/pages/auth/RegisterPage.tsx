@@ -26,7 +26,7 @@ const RegisterPage: React.FC = () => {
       } as RegisterRequest);
       
       login(response.user, response.token, response.refreshToken);
-      message.success('Đăng ký thành công!');
+      message.success('Account created successfully!');
       
       // Redirect based on role
       switch (role) {
@@ -46,10 +46,10 @@ const RegisterPage: React.FC = () => {
           const errorMessages = Object.values(errors).flat().join(', ');
           setError(errorMessages);
         } else {
-          setError(err.response.data?.message || 'Dữ liệu không hợp lệ');
+          setError(err.response.data?.message || 'Invalid data');
         }
       } else {
-        setError('Đã xảy ra lỗi. Vui lòng thử lại sau.');
+        setError('Something went wrong. Please try again later.');
       }
     } finally {
       setLoading(false);
@@ -64,10 +64,10 @@ const RegisterPage: React.FC = () => {
         color: '#101114',
         fontWeight: 700,
       }}>
-        Tạo tài khoản mới
+        Create an account
       </Title>
       <Paragraph type="secondary" style={{ textAlign: 'center', marginBottom: 32 }}>
-        Tham gia TutorMatch ngay hôm nay
+        Join TutorMatch today
       </Paragraph>
 
       {error && (
@@ -87,7 +87,7 @@ const RegisterPage: React.FC = () => {
           fontWeight: 500,
           color: '#101114',
         }}>
-          Bạn là
+          I am a
         </label>
         <Radio.Group 
           value={role} 
@@ -110,7 +110,7 @@ const RegisterPage: React.FC = () => {
             >
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 18, marginBottom: 4 }}>🎓</div>
-                <div>Học sinh</div>
+                <div>Student</div>
               </div>
             </Radio.Button>
             <Radio.Button 
@@ -128,7 +128,7 @@ const RegisterPage: React.FC = () => {
             >
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 18, marginBottom: 4 }}>👨‍🏫</div>
-                <div>Gia sư</div>
+                <div>Tutor</div>
               </div>
             </Radio.Button>
           </div>
@@ -145,21 +145,21 @@ const RegisterPage: React.FC = () => {
         <Form.Item
           name="fullName"
           rules={[
-            { required: true, message: 'Vui lòng nhập họ và tên!' },
-            { min: 2, message: 'Họ và tên phải có ít nhất 2 ký tự!' },
+            { required: true, message: 'Please enter your full name!' },
+            { min: 2, message: 'Full name must contain at least 2 characters!' },
           ]}
         >
           <Input 
             prefix={<UserOutlined style={{ color: '#9497a9' }} />}
-            placeholder="Họ và tên"
+            placeholder="Full name"
           />
         </Form.Item>
 
         <Form.Item
           name="email"
           rules={[
-            { required: true, message: 'Vui lòng nhập email!' },
-            { type: 'email', message: 'Email không hợp lệ!' },
+            { required: true, message: 'Please enter your email!' },
+            { type: 'email', message: 'Invalid email address!' },
           ]}
         >
           <Input 
@@ -171,13 +171,13 @@ const RegisterPage: React.FC = () => {
         <Form.Item
           name="password"
           rules={[
-            { required: true, message: 'Vui lòng nhập mật khẩu!' },
-            { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' },
+            { required: true, message: 'Please enter your password!' },
+            { min: 6, message: 'Password must contain at least 6 characters!' },
           ]}
         >
           <Input.Password 
             prefix={<LockOutlined style={{ color: '#9497a9' }} />}
-            placeholder="Mật khẩu"
+            placeholder="Password"
           />
         </Form.Item>
 
@@ -185,20 +185,20 @@ const RegisterPage: React.FC = () => {
           name="confirmPassword"
           dependencies={['password']}
           rules={[
-            { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
+            { required: true, message: 'Please confirm your password!' },
             ({ getFieldValue }) => ({
               validator(_, value) {
                 if (!value || getFieldValue('password') === value) {
                   return Promise.resolve();
                 }
-                return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'));
+                return Promise.reject(new Error('The passwords do not match!'));
               },
             }),
           ]}
         >
           <Input.Password 
             prefix={<LockOutlined style={{ color: '#9497a9' }} />}
-            placeholder="Xác nhận mật khẩu"
+            placeholder="Confirm password"
           />
         </Form.Item>
 
@@ -208,15 +208,15 @@ const RegisterPage: React.FC = () => {
           rules={[
             { 
               validator: (_, value) => 
-                value ? Promise.resolve() : Promise.reject(new Error('Bạn phải đồng ý với điều khoản!')) 
+                value ? Promise.resolve() : Promise.reject(new Error('You must agree to the terms!'))
             },
           ]}
         >
           <Checkbox>
-            Tôi đồng ý với{' '}
-            <a href="#terms" style={{ color: '#7132f5' }}>Điều khoản sử dụng</a>
-            {' '}và{' '}
-            <a href="#privacy" style={{ color: '#7132f5' }}>Chính sách bảo mật</a>
+            I agree to the{' '}
+            <a href="#terms" style={{ color: '#7132f5' }}>Terms of Use</a>
+            {' '}and{' '}
+            <a href="#privacy" style={{ color: '#7132f5' }}>Privacy Policy</a>
           </Checkbox>
         </Form.Item>
 
@@ -233,15 +233,15 @@ const RegisterPage: React.FC = () => {
               fontSize: 16,
             }}
           >
-            Đăng ký
+            Sign up
           </Button>
         </Form.Item>
       </Form>
 
       <Paragraph type="secondary" style={{ textAlign: 'center', marginTop: 24, marginBottom: 0 }}>
-        Đã có tài khoản?{' '}
+        Already have an account?{' '}
         <Link to="/login" style={{ color: '#7132f5', fontWeight: 500 }}>
-          Đăng nhập ngay
+          Sign in now
         </Link>
       </Paragraph>
     </div>
