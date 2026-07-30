@@ -34,31 +34,31 @@ const TutorWallet: React.FC = () => {
 
   const columns = [
     {
-      title: 'Ngày',
+      title: 'Date',
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (date: string) => formatDateTime(date),
     },
     {
-      title: 'Loại',
+      title: 'Type',
       dataIndex: 'type',
       key: 'type',
       render: (type: string) => {
         const typeMap: Record<string, { color: string; label: string }> = {
-          Deposit: { color: 'green', label: 'Nạp tiền' },
-          SessionFee: { color: 'purple', label: 'Phí buổi học' },
-          LateCancellationFee: { color: 'red', label: 'Phí hủy muộn' },
-          Refund: { color: 'blue', label: 'Hoàn tiền' },
+          Deposit: { color: 'green', label: 'Learning Credit Top-up' },
+          SessionFee: { color: 'purple', label: 'Session Fee' },
+          LateCancellationFee: { color: 'red', label: 'Late Cancellation Fee' },
+          Refund: { color: 'blue', label: 'Refund' },
         };
         const config = typeMap[type] || { color: 'default', label: type };
         return <Tag color={config.color}>{config.label}</Tag>;
       },
     },
     {
-      title: 'Số tiền',
+      title: 'Learning Credits',
       dataIndex: 'amount',
       key: 'amount',
-      render: (amount: number, record: any) => {
+      render: (amount: number, record: CreditTransaction) => {
         const isPositive = record.type === 'Deposit' || record.type === 'SessionFee' || record.type === 'Refund';
         return (
           <Text style={{ color: isPositive ? '#149e61' : '#dc2626', fontWeight: 600 }}>
@@ -68,7 +68,7 @@ const TutorWallet: React.FC = () => {
       },
     },
     {
-      title: 'Mô tả',
+      title: 'Description',
       dataIndex: 'description',
       key: 'description',
       render: (desc: string) => desc || '-',
@@ -83,9 +83,9 @@ const TutorWallet: React.FC = () => {
     <div>
       <div style={{ marginBottom: 24 }}>
         <Title level={2} style={{ margin: 0, fontWeight: 700, color: '#101114' }}>
-          Ví Credit
+          Learning Credit Wallet
         </Title>
-        <Text type="secondary">Theo dõi thu nhập và lịch sử giao dịch</Text>
+        <Text type="secondary">Track earnings and transaction history</Text>
       </div>
 
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
@@ -99,7 +99,7 @@ const TutorWallet: React.FC = () => {
             }}
           >
             <Statistic
-              title={<span style={{ color: 'rgba(255,255,255,0.8)' }}>Số dư hiện tại</span>}
+              title={<span style={{ color: 'rgba(255,255,255,0.8)' }}>Current Learning Credit Balance</span>}
               value={balance}
               precision={0}
               prefix={<WalletOutlined style={{ color: '#fff' }} />}
@@ -115,7 +115,7 @@ const TutorWallet: React.FC = () => {
         style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}
         title={
           <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <HistoryOutlined /> Lịch sử giao dịch
+            <HistoryOutlined /> Transaction History
           </span>
         }
       >
@@ -124,7 +124,8 @@ const TutorWallet: React.FC = () => {
           columns={columns}
           rowKey="id"
           pagination={{ pageSize: 10 }}
-          locale={{ emptyText: 'Chưa có giao dịch nào' }}
+          scroll={{ x: 720 }}
+          locale={{ emptyText: 'No transactions yet' }}
         />
       </Card>
     </div>
