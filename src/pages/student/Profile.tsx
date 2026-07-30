@@ -5,12 +5,14 @@ import { useAuthStore } from '../../stores';
 import { profileService } from '../../services';
 import { Loading } from '../../components/common';
 import type { User } from '../../types';
+import { useNavigate } from 'react-router-dom';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 const Profile: React.FC = () => {
   const { user, updateUser } = useAuthStore();
+  const navigate = useNavigate();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -30,9 +32,9 @@ const Profile: React.FC = () => {
     try {
       const updatedUser = await profileService.updateMe(values);
       updateUser(updatedUser);
-      message.success('Cập nhật hồ sơ thành công!');
+      message.success('Profile updated successfully!');
     } catch (error) {
-      message.error('Không thể cập nhật hồ sơ');
+      message.error('Unable to update profile');
     } finally {
       setLoading(false);
     }
@@ -46,9 +48,9 @@ const Profile: React.FC = () => {
     <div>
       <div style={{ marginBottom: 24 }}>
         <Title level={2} style={{ margin: 0, fontWeight: 700, color: '#101114' }}>
-          Hồ sơ của tôi
+          My Profile
         </Title>
-        <Text type="secondary">Quản lý thông tin cá nhân của bạn</Text>
+        <Text type="secondary">Manage your personal information</Text>
       </div>
 
       <Row gutter={24}>
@@ -81,7 +83,7 @@ const Profile: React.FC = () => {
               fontWeight: 500,
               fontSize: 13,
             }}>
-              Học sinh
+              Student
             </div>
 
             <Divider />
@@ -92,9 +94,9 @@ const Profile: React.FC = () => {
                 <Text>{user?.email}</Text>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Text type="secondary">Trạng thái</Text>
+                <Text type="secondary">Status</Text>
                 <Text style={{ color: user?.isSuspended ? '#dc2626' : '#149e61' }}>
-                  {user?.isSuspended ? 'Bị khóa' : 'Hoạt động'}
+                  {user?.isSuspended ? 'Suspended' : 'Active'}
                 </Text>
               </div>
             </div>
@@ -106,7 +108,7 @@ const Profile: React.FC = () => {
           <Card 
             variant="borderless" 
             style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}
-            title={<span style={{ fontWeight: 600 }}>Chỉnh sửa hồ sơ</span>}
+            title={<span style={{ fontWeight: 600 }}>Edit Profile</span>}
           >
             <Form
               form={form}
@@ -118,14 +120,14 @@ const Profile: React.FC = () => {
               }}
             >
               <Form.Item
-                label="Họ và tên"
+                label="Full name"
                 name="fullName"
                 rules={[
-                  { required: true, message: 'Vui lòng nhập họ và tên!' },
-                  { min: 2, message: 'Họ và tên phải có ít nhất 2 ký tự!' },
+                  { required: true, message: 'Please enter your full name!' },
+                  { min: 2, message: 'Full name must contain at least 2 characters!' },
                 ]}
               >
-                <Input size="large" placeholder="Nhập họ và tên" />
+                <Input size="large" placeholder="Enter your full name" />
               </Form.Item>
 
               <Form.Item
@@ -140,14 +142,14 @@ const Profile: React.FC = () => {
               <Form.Item style={{ marginBottom: 0 }}>
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
                   <Button onClick={() => form.resetFields()}>
-                    Đặt lại
+                    Reset
                   </Button>
                   <Button 
                     type="primary" 
                     htmlType="submit"
                     loading={loading}
                   >
-                    Lưu thay đổi
+                    Save Changes
                   </Button>
                 </div>
               </Form.Item>
@@ -162,16 +164,16 @@ const Profile: React.FC = () => {
               boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px',
               marginTop: 16,
             }}
-            title={<span style={{ fontWeight: 600 }}>Bảo mật</span>}
+            title={<span style={{ fontWeight: 600 }}>Security</span>}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <Text strong>Đổi mật khẩu</Text>
+                <Text strong>Change password</Text>
                 <Text type="secondary" style={{ display: 'block', fontSize: 13 }}>
-                  Cập nhật mật khẩu để bảo vệ tài khoản của bạn
+                  Update your password to keep your account secure
                 </Text>
               </div>
-              <Button>Đổi mật khẩu</Button>
+              <Button onClick={() => navigate('/change-password')}>Change password</Button>
             </div>
           </Card>
         </Col>
