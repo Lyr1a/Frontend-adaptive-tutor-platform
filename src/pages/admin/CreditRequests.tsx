@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Typography, Table, Button, Modal, Input, InputNumber, Avatar, Empty, message, Tag } from 'antd';
-import { CheckOutlined, CloseOutlined, UserOutlined, DollarOutlined } from '@ant-design/icons';
+import { CheckOutlined, CloseOutlined, UserOutlined } from '@ant-design/icons';
 import { adminService } from '../../services';
 import { Loading, StatusBadge } from '../../components/common';
 import type { CreditRequest } from '../../types';
@@ -29,7 +29,7 @@ const CreditRequests: React.FC = () => {
       setRequests(data);
     } catch (error) {
       console.error('Failed to fetch credit requests:', error);
-      message.error('Không thể tải danh sách yêu cầu');
+      message.error('Unable to load requests');
     } finally {
       setLoading(false);
     }
@@ -41,12 +41,12 @@ const CreditRequests: React.FC = () => {
     setSubmitting(true);
     try {
       await adminService.approveCredit(selectedRequest.id);
-      message.success('Duyệt yêu cầu thành công!');
+      message.success('Request approved successfully!');
       setModalVisible(false);
       setSelectedRequest(null);
       fetchRequests();
     } catch (error) {
-      message.error('Không thể duyệt yêu cầu');
+      message.error('Unable to approve the request');
     } finally {
       setSubmitting(false);
     }
@@ -58,13 +58,13 @@ const CreditRequests: React.FC = () => {
     setSubmitting(true);
     try {
       await adminService.rejectCredit(selectedRequest.id, rejectReason);
-      message.success('Từ chối yêu cầu thành công!');
+      message.success('Request rejected successfully!');
       setModalVisible(false);
       setSelectedRequest(null);
       setRejectReason('');
       fetchRequests();
     } catch (error) {
-      message.error('Không thể từ chối yêu cầu');
+      message.error('Unable to reject the request');
     } finally {
       setSubmitting(false);
     }
@@ -79,7 +79,7 @@ const CreditRequests: React.FC = () => {
 
   const columns = [
     {
-      title: 'Người dùng',
+      title: 'User',
       dataIndex: 'userName',
       key: 'userName',
       render: (text: string, record: CreditRequest) => (
@@ -95,7 +95,7 @@ const CreditRequests: React.FC = () => {
       ),
     },
     {
-      title: 'Số tiền',
+      title: 'Learning Credits',
       dataIndex: 'amount',
       key: 'amount',
       render: (amount: number) => (
@@ -105,7 +105,7 @@ const CreditRequests: React.FC = () => {
       ),
     },
     {
-      title: 'Ghi chú',
+      title: 'Note',
       dataIndex: 'note',
       key: 'note',
       render: (note: string) => (
@@ -115,19 +115,19 @@ const CreditRequests: React.FC = () => {
       ),
     },
     {
-      title: 'Ngày yêu cầu',
+      title: 'Request Date',
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (date: string) => formatDateTime(date),
     },
     {
-      title: 'Trạng thái',
+      title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => <StatusBadge status={status} />,
     },
     {
-      title: 'Thao tác',
+      title: 'Actions',
       key: 'action',
       render: (_: any, record: CreditRequest) => (
         <div style={{ display: 'flex', gap: 8 }}>
@@ -138,7 +138,7 @@ const CreditRequests: React.FC = () => {
             style={{ backgroundColor: '#149e61', borderColor: '#149e61' }}
             onClick={() => openModal(record, 'approve')}
           >
-            Duyệt
+            Approve
           </Button>
           <Button 
             danger
@@ -146,7 +146,7 @@ const CreditRequests: React.FC = () => {
             size="small"
             onClick={() => openModal(record, 'reject')}
           >
-            Từ chối
+            Reject
           </Button>
         </div>
       ),
@@ -161,9 +161,9 @@ const CreditRequests: React.FC = () => {
     <div>
       <div style={{ marginBottom: 24 }}>
         <Title level={2} style={{ margin: 0, fontWeight: 700, color: '#101114' }}>
-          Yêu cầu nạp tiền
+          Learning Credit Requests
         </Title>
-        <Text type="secondary">Xem xét và duyệt các yêu cầu nạp Credit</Text>
+        <Text type="secondary">Review and approve Learning Credit requests</Text>
       </div>
 
       <Card 
@@ -176,15 +176,16 @@ const CreditRequests: React.FC = () => {
             columns={columns}
             rowKey="id"
             pagination={{ pageSize: 10 }}
+            scroll={{ x: 900 }}
           />
         ) : (
-          <Empty description="Không có yêu cầu nạp tiền nào đang chờ duyệt" />
+          <Empty description="There are no Learning Credit requests awaiting approval" />
         )}
       </Card>
 
       {/* Approval/Rejection Modal */}
       <Modal
-        title={actionType === 'approve' ? 'Duyệt yêu cầu nạp tiền' : 'Từ chối yêu cầu'}
+        title={actionType === 'approve' ? 'Approve Learning Credit Request' : 'Reject Request'}
         open={modalVisible}
         onCancel={() => {
           setModalVisible(false);
@@ -214,7 +215,7 @@ const CreditRequests: React.FC = () => {
             </div>
 
             <div style={{ marginBottom: 16 }}>
-              <Text type="secondary">Số tiền yêu cầu:</Text>
+              <Text type="secondary">Requested Learning Credits:</Text>
               <Text strong style={{ fontSize: 24, color: '#149e61', marginLeft: 8 }}>
                 {formatCurrency(selectedRequest.amount)}
               </Text>
@@ -222,21 +223,21 @@ const CreditRequests: React.FC = () => {
 
             {selectedRequest.note && (
               <div style={{ marginBottom: 16 }}>
-                <Text type="secondary">Ghi chú:</Text>
+                <Text type="secondary">Note:</Text>
                 <div style={{ marginTop: 4 }}>{selectedRequest.note}</div>
               </div>
             )}
 
             {actionType === 'approve' ? (
               <>
-                <Text>Bạn có chắc muốn duyệt yêu cầu nạp tiền này?</Text>
+                <Text>Are you sure you want to approve this Learning Credit request?</Text>
               </>
             ) : (
               <>
-                <Text>Nhập lý do từ chối:</Text>
+                <Text>Enter a rejection reason:</Text>
                 <TextArea
                   rows={3}
-                  placeholder="Nhập lý do..."
+                  placeholder="Enter a reason..."
                   value={rejectReason}
                   onChange={(e) => setRejectReason(e.target.value)}
                   style={{ marginTop: 8 }}
@@ -245,7 +246,7 @@ const CreditRequests: React.FC = () => {
             )}
 
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 24 }}>
-              <Button onClick={() => setModalVisible(false)}>Hủy</Button>
+              <Button onClick={() => setModalVisible(false)}>Cancel</Button>
               <Button 
                 type="primary" 
                 loading={submitting}
@@ -255,7 +256,7 @@ const CreditRequests: React.FC = () => {
                 }}
                 onClick={actionType === 'approve' ? handleApprove : handleReject}
               >
-                {actionType === 'approve' ? 'Duyệt' : 'Từ chối'}
+                {actionType === 'approve' ? 'Approve' : 'Reject'}
               </Button>
             </div>
           </div>
