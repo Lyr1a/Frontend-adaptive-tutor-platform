@@ -24,7 +24,7 @@ const ResetPasswordPage: React.FC = () => {
       message.success(response.message);
       navigate('/login');
     } catch {
-      message.error('Mã đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.');
+      message.error('The password reset code is invalid or expired.');
     } finally {
       setLoading(false);
     }
@@ -32,9 +32,9 @@ const ResetPasswordPage: React.FC = () => {
 
   return (
     <div>
-      <Title level={3} style={{ textAlign: 'center' }}>Đặt lại mật khẩu</Title>
+      <Title level={3} style={{ textAlign: 'center' }}>Reset password</Title>
       <Paragraph type="secondary" style={{ textAlign: 'center' }}>
-        Chọn mật khẩu mới cho tài khoản của bạn.
+        Choose a new password for your account.
       </Paragraph>
       <Form<ResetForm>
         layout="vertical"
@@ -42,19 +42,19 @@ const ResetPasswordPage: React.FC = () => {
         initialValues={{ token }}
         onFinish={onFinish}
       >
-        <Form.Item name="token" label="Mã đặt lại" rules={[{ required: true }]}>
+        <Form.Item name="token" label="Reset code" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
         <Form.Item
           name="newPassword"
-          label="Mật khẩu mới"
-          rules={[{ required: true }, { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự.' }]}
+          label="New password"
+          rules={[{ required: true }, { min: 8, message: 'Password must contain at least 8 characters.' }]}
         >
           <Input.Password />
         </Form.Item>
         <Form.Item
           name="confirmPassword"
-          label="Xác nhận mật khẩu"
+          label="Confirm password"
           dependencies={['newPassword']}
           rules={[
             { required: true },
@@ -62,7 +62,7 @@ const ResetPasswordPage: React.FC = () => {
               validator(_, value) {
                 return !value || getFieldValue('newPassword') === value
                   ? Promise.resolve()
-                  : Promise.reject(new Error('Mật khẩu xác nhận không khớp.'));
+                  : Promise.reject(new Error('The passwords do not match.'));
               },
             }),
           ]}
@@ -70,11 +70,11 @@ const ResetPasswordPage: React.FC = () => {
           <Input.Password />
         </Form.Item>
         <Button type="primary" htmlType="submit" loading={loading} block>
-          Đổi mật khẩu
+          Change password
         </Button>
       </Form>
       <Paragraph style={{ textAlign: 'center', marginTop: 20 }}>
-        <Link to="/login">Quay lại đăng nhập</Link>
+        <Link to="/login">Back to sign in</Link>
       </Paragraph>
     </div>
   );

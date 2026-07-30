@@ -8,6 +8,10 @@ import type { LoginRequest } from '../../types';
 
 const { Title, Text, Paragraph } = Typography;
 
+interface LoginFormValues extends LoginRequest {
+  remember?: boolean;
+}
+
 const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,14 +21,17 @@ const LoginPage: React.FC = () => {
 
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || null;
 
-  const onFinish = async (values: LoginRequest) => {
+  const onFinish = async (values: LoginFormValues) => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await authService.login(values);
-      login(response.user, response.token, response.refreshToken);
-      message.success('Đăng nhập thành công!');
+      const response = await authService.login({
+        email: values.email,
+        password: values.password,
+      });
+      login(response.user, response.token, response.refreshToken, values.remember === true);
+      message.success('Signed in successfully!');
       
       // Redirect based on role
       if (from) {
@@ -46,11 +53,11 @@ const LoginPage: React.FC = () => {
       }
     } catch (err: any) {
       if (err.response?.status === 401) {
-        setError('Email hoặc mật khẩu không chính xác');
+        setError('Incorrect email or password');
       } else if (err.response?.status === 403) {
-        setError('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ hỗ trợ.');
+        setError('Your account has been suspended. Please contact support.');
       } else {
-        setError('Đã xảy ra lỗi. Vui lòng thử lại sau.');
+        setError('Something went wrong. Please try again later.');
       }
     } finally {
       setLoading(false);
@@ -65,10 +72,10 @@ const LoginPage: React.FC = () => {
         color: '#101114',
         fontWeight: 700,
       }}>
-        Chào mừng trở lại
+        Welcome back
       </Title>
       <Paragraph type="secondary" style={{ textAlign: 'center', marginBottom: 32 }}>
-        Đăng nhập để tiếp tục với TutorMatch
+        Sign in to continue to TutorMatch
       </Paragraph>
 
       {error && (
@@ -84,40 +91,43 @@ const LoginPage: React.FC = () => {
         name="login"
         layout="vertical"
         onFinish={onFinish}
-        autoComplete="off"
+        autoComplete="on"
+        initialValues={{ remember: false }}
         size="large"
       >
         <Form.Item
           name="email"
           rules={[
-            { required: true, message: 'Vui lòng nhập email!' },
-            { type: 'email', message: 'Email không hợp lệ!' },
+            { required: true, message: 'Please enter your email!' },
+            { type: 'email', message: 'Invalid email address!' },
           ]}
         >
           <Input 
             prefix={<MailOutlined style={{ color: '#9497a9' }} />}
             placeholder="Email"
+            autoComplete="email"
           />
         </Form.Item>
 
         <Form.Item
           name="password"
           rules={[
-            { required: true, message: 'Vui lòng nhập mật khẩu!' },
+            { required: true, message: 'Please enter your password!' },
           ]}
         >
           <Input.Password 
             prefix={<LockOutlined style={{ color: '#9497a9' }} />}
-            placeholder="Mật khẩu"
+            placeholder="Password"
+            autoComplete="current-password"
           />
         </Form.Item>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <Form.Item name="remember" valuePropName="checked" noStyle>
-            <Checkbox>Ghi nhớ đăng nhập</Checkbox>
+            <Checkbox>Remember me</Checkbox>
           </Form.Item>
           <Link to="/forgot-password" style={{ color: '#7132f5' }}>
-            Quên mật khẩu?
+            Forgot password?
           </Link>
         </div>
 
@@ -134,18 +144,19 @@ const LoginPage: React.FC = () => {
               fontSize: 16,
             }}
           >
-            Đăng nhập
+            Sign in
           </Button>
         </Form.Item>
       </Form>
 
       <Divider style={{ margin: '24px 0' }}>
-        <Text type="secondary" style={{ fontSize: 13 }}>Hoặc đăng nhập với</Text>
+        <Text type="secondary" style={{ fontSize: 13 }}>Or continue with</Text>
       </Divider>
 
       <div style={{ display: 'flex', gap: 12 }}>
         <Button
           icon={<GoogleOutlined />}
+          onClick={() => navigate('/404')}
           style={{
             flex: 1,
             height: 44,
@@ -159,6 +170,7 @@ const LoginPage: React.FC = () => {
         </Button>
         <Button
           icon={<GithubOutlined />}
+          onClick={() => navigate('/404')}
           style={{
             flex: 1,
             height: 44,
@@ -173,9 +185,9 @@ const LoginPage: React.FC = () => {
       </div>
 
       <Paragraph type="secondary" style={{ textAlign: 'center', marginTop: 24, marginBottom: 0 }}>
-        Chưa có tài khoản?{' '}
+        Don't have an account?{' '}
         <Link to="/register" style={{ color: '#7132f5', fontWeight: 500 }}>
-          Đăng ký ngay
+          Sign up now
         </Link>
       </Paragraph>
     </div>
