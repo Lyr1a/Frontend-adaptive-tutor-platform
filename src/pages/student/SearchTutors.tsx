@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Input, Select, Slider, Button, Typography, Pagination, Skeleton } from 'antd';
+import { Alert, Row, Col, Card, Input, Select, Slider, Button, Typography, Pagination, Skeleton } from 'antd';
 import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
 import { tutorService, subjectService } from '../../services';
 import { Loading, TutorCard } from '../../components/common';
 import type { TutorProfile, Subject, TutorSearchParams } from '../../types';
+import { formatCurrency } from '../../utils';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
 const SearchTutors: React.FC = () => {
-  const navigate = useNavigate();
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [tutors, setTutors] = useState<TutorProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,14 +22,22 @@ const SearchTutors: React.FC = () => {
   const [minRate, setMinRate] = useState<number>(0);
   const [maxRate, setMaxRate] = useState<number>(500000);
   const [searchTerm, setSearchTerm] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
         const data = await subjectService.getAll();
-        setSubjects(data.filter(s => s.isActive));
+        // The tutor search API only accepts subjectId greater than 0.
+        const activeSubjects = (data || []).filter(s => s.isActive && s.id > 0);
+        setSubjects(activeSubjects);
+        if (activeSubjects.length > 0) {
+          setSelectedSubject((current) => current ?? activeSubjects[0].id);
+        }
       } catch (error) {
         console.error('Failed to fetch subjects:', error);
+        setError('Unable to load subjects. Please check the API connection.');
+        setLoading(false);
       }
     };
     fetchSubjects();
@@ -38,12 +45,13 @@ const SearchTutors: React.FC = () => {
 
   useEffect(() => {
     const fetchTutors = async () => {
-      if (!selectedSubject) {
+      if (selectedSubject === null) {
         setLoading(false);
         return;
       }
 
       setLoading(true);
+      setError(null);
       try {
         const params: TutorSearchParams = {
           subjectId: selectedSubject,
@@ -54,17 +62,29 @@ const SearchTutors: React.FC = () => {
         };
 
         const data = await tutorService.search(params);
-        setTutors(data.items);
+        const normalizedTutors = (data.items || []).map((tutor) => ({
+          ...tutor,
+          subjects: (tutor.subjects || []).map((subject) => ({
+            ...subject,
+            subjectName:
+              subjects.find((item) => item.id === subject.subjectId)?.name ||
+              subject.subjectName,
+          })),
+        }));
+        setTutors(normalizedTutors);
         setTotalCount(data.totalCount);
       } catch (error) {
         console.error('Failed to fetch tutors:', error);
+        setTutors([]);
+        setTotalCount(0);
+        setError('Unable to find tutors. Please check the API and try again.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchTutors();
-  }, [selectedSubject, minRate, maxRate, page, pageSize]);
+  }, [selectedSubject, minRate, maxRate, page, pageSize, subjects]);
 
   const handleSubjectChange = (value: number) => {
     setSelectedSubject(value);
@@ -78,22 +98,14 @@ const SearchTutors: React.FC = () => {
       )
     : (tutors || []);
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-      minimumFractionDigits: 0,
-    }).format(value);
-  };
-
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
         <Title level={2} style={{ margin: 0, fontWeight: 700, color: '#101114' }}>
-          Tìm kiếm gia sư
+          Find Tutors
         </Title>
         <Text type="secondary">
-          Tìm gia sư phù hợp với nhu cầu học tập của bạn
+          Find tutors who match your learning needs
         </Text>
       </div>
 
@@ -105,7 +117,7 @@ const SearchTutors: React.FC = () => {
             style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}
             title={
               <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <FilterOutlined /> Bộ lọc
+                <FilterOutlined /> Filters
               </span>
             }
           >
@@ -113,10 +125,10 @@ const SearchTutors: React.FC = () => {
               {/* Subject Filter */}
               <div>
                 <label style={{ fontWeight: 500, marginBottom: 8, display: 'block' }}>
-                  Môn học <span style={{ color: '#dc2626' }}>*</span>
+                  Subject <span style={{ color: '#dc2626' }}>*</span>
                 </label>
                 <Select
-                  placeholder="Chọn môn học"
+                  placeholder="Select a subject"
                   style={{ width: '100%' }}
                   value={selectedSubject}
                   onChange={handleSubjectChange}
@@ -133,7 +145,7 @@ const SearchTutors: React.FC = () => {
               {/* Rate Range */}
               <div>
                 <label style={{ fontWeight: 500, marginBottom: 8, display: 'block' }}>
-                  Mức giá (VNĐ/giờ)
+                  Rate (Learning Credits/hour)
                 </label>
                 <div style={{ padding: '0 8px' }}>
                   <Slider
@@ -165,7 +177,7 @@ const SearchTutors: React.FC = () => {
                   setPage(1);
                 }}
               >
-                Đặt lại bộ lọc
+                Reset Filters
               </Button>
             </div>
           </Card>
@@ -173,10 +185,20 @@ const SearchTutors: React.FC = () => {
 
         {/* Results */}
         <Col xs={24} lg={18}>
+          {error && (
+            <Alert
+              type="error"
+              showIcon
+              closable
+              message={error}
+              style={{ marginBottom: 16 }}
+              onClose={() => setError(null)}
+            />
+          )}
           {/* Search Bar */}
           <div style={{ marginBottom: 16 }}>
             <Input
-              placeholder="Tìm kiếm theo tên hoặc mô tả..."
+              placeholder="Search by name or description..."
               prefix={<SearchOutlined style={{ color: '#9497a9' }} />}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -189,8 +211,8 @@ const SearchTutors: React.FC = () => {
           <div style={{ marginBottom: 16 }}>
             <Text type="secondary">
               {selectedSubject 
-                ? `Tìm thấy ${totalCount} gia sư`
-                : 'Vui lòng chọn môn học để tìm kiếm'
+                ? `Found ${totalCount} tutors`
+                : 'Select a subject to search'
               }
             </Text>
           </div>
@@ -228,7 +250,7 @@ const SearchTutors: React.FC = () => {
                       setPageSize(ps);
                     }}
                     showSizeChanger
-                    showTotal={(total) => `Tổng ${total} gia sư`}
+                    showTotal={(total) => `Total ${total} tutors`}
                   />
                 </div>
               )}
@@ -243,9 +265,9 @@ const SearchTutors: React.FC = () => {
               }}
             >
               <SearchOutlined style={{ fontSize: 48, color: '#9497a9', marginBottom: 16 }} />
-              <Title level={4} type="secondary">Không tìm thấy gia sư</Title>
+              <Title level={4} type="secondary">No Tutors Found</Title>
               <Text type="secondary">
-                Hãy thử điều chỉnh bộ lọc hoặc tìm kiếm với từ khóa khác
+                Try adjusting the filters or using a different search term
               </Text>
             </Card>
           )}
