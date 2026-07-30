@@ -36,7 +36,7 @@ const SessionDetail: React.FC = () => {
       setSession(data);
     } catch (error) {
       console.error('Failed to fetch session:', error);
-      message.error('Không thể tải thông tin buổi học');
+      message.error('Unable to load session details');
     } finally {
       setLoading(false);
     }
@@ -54,9 +54,9 @@ const SessionDetail: React.FC = () => {
       });
       setFeedback(response);
       setFeedbackModalVisible(false);
-      message.success('Cảm ơn bạn đã đánh giá!');
+      message.success('Thank you for your review!');
     } catch (error) {
-      message.error('Không thể gửi đánh giá');
+      message.error('Unable to submit your review');
     } finally {
       setSubmitting(false);
     }
@@ -71,8 +71,8 @@ const SessionDetail: React.FC = () => {
   if (!session) {
     return (
       <Card variant="borderless" style={{ borderRadius: 12, textAlign: 'center', padding: 48 }}>
-        <Title level={4}>Không tìm thấy buổi học</Title>
-        <Button onClick={() => navigate(-1)}>Quay lại</Button>
+        <Title level={4}>Session not found</Title>
+        <Button onClick={() => navigate(-1)}>Back</Button>
       </Card>
     );
   }
@@ -84,7 +84,7 @@ const SessionDetail: React.FC = () => {
         onClick={() => navigate(-1)}
         style={{ marginBottom: 16 }}
       >
-        Quay lại
+        Back
       </Button>
 
       <Row gutter={24}>
@@ -107,7 +107,7 @@ const SessionDetail: React.FC = () => {
 
             {/* Tutor Info */}
             <div style={{ marginBottom: 20 }}>
-              <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>Gia sư</Text>
+              <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>Tutor</Text>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <Avatar 
                   size={48} 
@@ -125,7 +125,7 @@ const SessionDetail: React.FC = () => {
 
             {/* Session Time */}
             <div style={{ marginBottom: 20 }}>
-              <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>Thời gian</Text>
+              <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>Time</Text>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <CalendarOutlined style={{ color: '#7132f5' }} />
                 <Text style={{ fontSize: 16 }}>
@@ -137,7 +137,7 @@ const SessionDetail: React.FC = () => {
             {/* Meeting Link */}
             {session.meetingLink && (
               <div style={{ marginBottom: 20 }}>
-                <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>Link học trực tuyến</Text>
+                <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>Online Meeting Link</Text>
                 <a 
                   href={session.meetingLink} 
                   target="_blank" 
@@ -153,7 +153,7 @@ const SessionDetail: React.FC = () => {
                   }}
                 >
                   <VideoCameraOutlined style={{ fontSize: 18 }} />
-                  <Text strong>Tham gia buổi học</Text>
+                  <Text strong>Join Session</Text>
                 </a>
               </div>
             )}
@@ -163,10 +163,10 @@ const SessionDetail: React.FC = () => {
               <>
                 <Divider />
                 <div style={{ marginBottom: 20 }}>
-                  <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>Kết quả buổi học</Text>
+                  <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>Session Result</Text>
                   {session.score !== undefined && session.score !== null && (
                     <div style={{ marginBottom: 8 }}>
-                      <Text strong>Điểm số: </Text>
+                      <Text strong>Score: </Text>
                       <Text style={{ fontSize: 20, fontWeight: 700, color: '#7132f5' }}>
                         {session.score}/10
                       </Text>
@@ -179,7 +179,7 @@ const SessionDetail: React.FC = () => {
                   )}
                   {session.goalCompletionPercentage !== undefined && (
                     <div style={{ marginTop: 8 }}>
-                      <Text type="secondary">Tiến độ mục tiêu: </Text>
+                      <Text type="secondary">Goal Progress: </Text>
                       <Text>{session.goalCompletionPercentage}%</Text>
                     </div>
                   )}
@@ -192,7 +192,7 @@ const SessionDetail: React.FC = () => {
               <>
                 <Divider />
                 <div>
-                  <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>Đánh giá của bạn</Text>
+                  <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>Your Review</Text>
                   <Rate disabled value={feedback.rating} style={{ marginBottom: 8 }} />
                   {feedback.comment && (
                     <Paragraph style={{ color: '#686b82', margin: 0 }}>
@@ -212,7 +212,7 @@ const SessionDetail: React.FC = () => {
                 onClick={() => setFeedbackModalVisible(true)}
                 style={{ marginTop: 24, borderRadius: 12 }}
               >
-                Đánh giá buổi học
+                Review Session
               </Button>
             )}
           </Card>
@@ -225,11 +225,11 @@ const SessionDetail: React.FC = () => {
             variant="borderless" 
             style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px', marginBottom: 16 }}
           >
-            <Title level={5} style={{ marginBottom: 16 }}>Thông tin buổi học</Title>
+            <Title level={5} style={{ marginBottom: 16 }}>Session Details</Title>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div>
-                <Text type="secondary" style={{ fontSize: 12 }}>Môn học</Text>
+                <Text type="secondary" style={{ fontSize: 12 }}>Subject</Text>
                 <div style={{ 
                   padding: '8px 12px', 
                   backgroundColor: 'rgba(113, 50, 245, 0.08)', 
@@ -242,9 +242,9 @@ const SessionDetail: React.FC = () => {
               </div>
 
               <div>
-                <Text type="secondary" style={{ fontSize: 12 }}>Ngày tạo</Text>
+                <Text type="secondary" style={{ fontSize: 12 }}>Created Date</Text>
                 <div style={{ fontSize: 14 }}>
-                  {dayjs(session.startTime).format('DD/MM/YYYY')}
+                  {dayjs(session.startTime).format('MMM D, YYYY')}
                 </div>
               </div>
             </div>
@@ -255,13 +255,13 @@ const SessionDetail: React.FC = () => {
             variant="borderless" 
             style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}
           >
-            <Title level={5} style={{ marginBottom: 16 }}>Thao tác</Title>
+            <Title level={5} style={{ marginBottom: 16 }}>Actions</Title>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {session.meetingLink && (session.status === 'Confirmed' || session.status === 'Pending') && (
                 <a href={session.meetingLink} target="_blank" rel="noopener noreferrer">
                   <Button type="primary" block style={{ borderRadius: 10 }}>
-                    Tham gia học
+                    Join Session
                   </Button>
                 </a>
               )}
@@ -272,7 +272,7 @@ const SessionDetail: React.FC = () => {
                   style={{ borderRadius: 10 }}
                   onClick={() => navigate(`/student/sessions?change=${session.id}`)}
                 >
-                  Đề xuất đổi lịch
+                  Request Reschedule
                 </Button>
               )}
             </div>
@@ -282,14 +282,14 @@ const SessionDetail: React.FC = () => {
 
       {/* Feedback Modal */}
       <Modal
-        title="Đánh giá buổi học"
+        title="Review Session"
         open={feedbackModalVisible}
         onCancel={() => setFeedbackModalVisible(false)}
         footer={null}
       >
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
-            Bạn cảm thấy buổi học như thế nào?
+            How was your session?
           </Text>
           <Rate 
             value={rating} 
@@ -297,29 +297,29 @@ const SessionDetail: React.FC = () => {
             style={{ fontSize: 32 }}
           />
           <div style={{ marginTop: 8, color: '#7132f5', fontWeight: 500 }}>
-            {rating === 5 ? 'Xuất sắc' : 
-             rating === 4 ? 'Rất tốt' : 
-             rating === 3 ? 'Tốt' : 
-             rating === 2 ? 'Khá' : 'Cần cải thiện'}
+            {rating === 5 ? 'Excellent' :
+             rating === 4 ? 'Very Good' :
+             rating === 3 ? 'Good' :
+             rating === 2 ? 'Fair' : 'Needs Improvement'}
           </div>
         </div>
 
         <TextArea
           rows={4}
-          placeholder="Nhận xét của bạn về buổi học (tùy chọn)..."
+          placeholder="Share your feedback about the session (optional)..."
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           style={{ marginBottom: 16 }}
         />
 
         <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-          <Button onClick={() => setFeedbackModalVisible(false)}>Hủy</Button>
+          <Button onClick={() => setFeedbackModalVisible(false)}>Cancel</Button>
           <Button 
             type="primary" 
             loading={submitting}
             onClick={handleSubmitFeedback}
           >
-            Gửi đánh giá
+            Submit Review
           </Button>
         </div>
       </Modal>

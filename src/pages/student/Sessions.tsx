@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Tabs, Typography, Row, Col, Empty, Skeleton, Modal, Form, Input, Select, message } from 'antd';
+import { Card, Tabs, Typography, Row, Col, Empty, Skeleton, Modal, Form, Input, Select, message, Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { sessionService, subjectService } from '../../services';
 import { Loading, SessionCard } from '../../components/common';
 import type { Session, SessionChangeType } from '../../types';
+import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -32,7 +33,7 @@ const StudentSessions: React.FC = () => {
       setSessions(data);
     } catch (error) {
       console.error('Failed to fetch sessions:', error);
-      message.error('Không thể tải danh sách buổi học');
+      message.error('Unable to load sessions');
     } finally {
       setLoading(false);
     }
@@ -53,21 +54,21 @@ const StudentSessions: React.FC = () => {
 
   const handleCancel = async (sessionId: number) => {
     Modal.confirm({
-      title: 'Hủy buổi học',
-      content: 'Bạn có chắc muốn hủy buổi học này? Phí hủy có thể được áp dụng.',
-      okText: 'Hủy buổi học',
+      title: 'Cancel Session',
+      content: 'Are you sure you want to cancel this session? A cancellation fee may apply.',
+      okText: 'Cancel Session',
       okButtonProps: { danger: true },
-      cancelText: 'Không',
+      cancelText: 'No',
       async onOk() {
         try {
           await sessionService.proposeChange(sessionId, {
             changeType: 'Cancel',
             reason: 'Student requested cancellation',
           });
-          message.success('Yêu cầu hủy đã được gửi');
+          message.success('Cancellation request submitted');
           fetchSessions();
         } catch (error) {
-          message.error('Không thể hủy buổi học');
+          message.error('Unable to cancel the session');
         }
       },
     });
@@ -78,18 +79,29 @@ const StudentSessions: React.FC = () => {
 
     setSubmitting(true);
     try {
+      const durationMinutes = dayjs(selectedSession.endTime).diff(
+        dayjs(selectedSession.startTime),
+        'minute'
+      );
+      const newStartTime = values.newStartTime
+        ? dayjs(values.newStartTime).toISOString()
+        : undefined;
+      const newEndTime = values.newStartTime
+        ? dayjs(values.newStartTime).add(durationMinutes, 'minute').toISOString()
+        : undefined;
+
       await sessionService.proposeChange(selectedSession.id, {
         changeType,
         reason: values.reason,
-        newStartTime: changeType === 'Reschedule' ? values.newStartTime : undefined,
-        newEndTime: changeType === 'Reschedule' ? values.newEndTime : undefined,
+        newStartTime: changeType === 'Reschedule' ? newStartTime : undefined,
+        newEndTime: changeType === 'Reschedule' ? newEndTime : undefined,
       });
-      message.success('Yêu cầu đã được gửi thành công');
+      message.success('Request submitted successfully');
       setModalVisible(false);
       form.resetFields();
       fetchSessions();
     } catch (error) {
-      message.error('Không thể gửi yêu cầu');
+      message.error('Unable to submit the request');
     } finally {
       setSubmitting(false);
     }
@@ -138,23 +150,23 @@ const StudentSessions: React.FC = () => {
   const tabItems = [
     {
       key: 'upcoming',
-      label: `Sắp tới (${upcomingSessions.length})`,
-      children: renderSessionsList(upcomingSessions, 'Không có buổi học nào sắp tới'),
+      label: `Upcoming (${upcomingSessions.length})`,
+      children: renderSessionsList(upcomingSessions, 'No upcoming sessions'),
     },
     {
       key: 'completed',
-      label: `Hoàn thành (${completedSessions.length})`,
-      children: renderSessionsList(completedSessions, 'Chưa có buổi học hoàn thành'),
+      label: `Completed (${completedSessions.length})`,
+      children: renderSessionsList(completedSessions, 'No completed sessions yet'),
     },
     {
       key: 'cancelled',
-      label: `Đã hủy (${cancelledSessions.length})`,
-      children: renderSessionsList(cancelledSessions, 'Không có buổi học bị hủy'),
+      label: `Cancelled (${cancelledSessions.length})`,
+      children: renderSessionsList(cancelledSessions, 'No cancelled sessions'),
     },
     {
       key: 'pending',
-      label: `Chờ đổi lịch (${pendingChangeSessions.length})`,
-      children: renderSessionsList(pendingChangeSessions, 'Không có yêu cầu đổi lịch'),
+      label: `Awaiting Reschedule (${pendingChangeSessions.length})`,
+      children: renderSessionsList(pendingChangeSessions, 'No reschedule requests'),
     },
   ];
 
@@ -162,9 +174,9 @@ const StudentSessions: React.FC = () => {
     <div>
       <div style={{ marginBottom: 24 }}>
         <Title level={2} style={{ margin: 0, fontWeight: 700, color: '#101114' }}>
-          Lịch học của tôi
+          My Sessions
         </Title>
-        <Text type="secondary">Theo dõi và quản lý các buổi học của bạn</Text>
+        <Text type="secondary">View and manage your sessions</Text>
       </div>
 
       <Card 
@@ -180,7 +192,7 @@ const StudentSessions: React.FC = () => {
 
       {/* Change Request Modal */}
       <Modal
-        title="Đề xuất thay đổi lịch"
+        title="Request a Schedule Change"
         open={modalVisible}
         onCancel={() => {
           setModalVisible(false);
@@ -193,23 +205,23 @@ const StudentSessions: React.FC = () => {
           layout="vertical"
           onFinish={handleSubmitChange}
         >
-          <Form.Item label="Loại thay đổi">
+          <Form.Item label="Change Type">
             <Select
               value={changeType}
               onChange={setChangeType}
               size="large"
             >
-              <Option value="Reschedule">Đổi lịch</Option>
-              <Option value="Cancel">Hủy buổi học</Option>
+              <Option value="Reschedule">Reschedule</Option>
+              <Option value="Cancel">Cancel Session</Option>
             </Select>
           </Form.Item>
 
           {changeType === 'Reschedule' && (
             <>
               <Form.Item
-                label="Ngày/giờ mới"
+                label="New Date and Time"
                 name="newStartTime"
-                rules={[{ required: true, message: 'Vui lòng chọn thời gian mới!' }]}
+                rules={[{ required: true, message: 'Please select a new date and time!' }]}
               >
                 <Input type="datetime-local" size="large" />
               </Form.Item>
@@ -217,46 +229,30 @@ const StudentSessions: React.FC = () => {
           )}
 
           <Form.Item
-            label="Lý do"
+            label="Reason"
             name="reason"
-            rules={[{ required: true, message: 'Vui lòng nhập lý do!' }]}
+            rules={[{ required: true, message: 'Please enter a reason!' }]}
           >
-            <TextArea rows={3} placeholder="Nhập lý do thay đổi lịch..." />
+            <TextArea rows={3} placeholder="Enter a reason for the schedule change..." />
           </Form.Item>
 
           <Form.Item style={{ marginBottom: 0 }}>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-              <button
-                type="button"
+              <Button
                 onClick={() => {
                   setModalVisible(false);
                   form.resetFields();
                 }}
-                style={{
-                  padding: '8px 24px',
-                  borderRadius: 10,
-                  border: '1px solid #dedee5',
-                  backgroundColor: '#fff',
-                  cursor: 'pointer',
-                }}
               >
-                Hủy
-              </button>
-              <button
-                type="submit"
-                disabled={submitting}
-                style={{
-                  padding: '8px 24px',
-                  borderRadius: 10,
-                  border: 'none',
-                  backgroundColor: '#7132f5',
-                  color: '#fff',
-                  cursor: submitting ? 'not-allowed' : 'pointer',
-                  opacity: submitting ? 0.7 : 1,
-                }}
+                Cancel
+              </Button>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={submitting}
               >
-                {submitting ? 'Đang gửi...' : 'Gửi yêu cầu'}
-              </button>
+                Submit request
+              </Button>
             </div>
           </Form.Item>
         </Form>

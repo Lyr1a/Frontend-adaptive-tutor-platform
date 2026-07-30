@@ -4,7 +4,16 @@ import type { RateSessionRequest, Feedback } from '../../types';
 
 export const feedbackService = {
   rateSession: async (data: RateSessionRequest): Promise<Feedback> => {
-    const response = await api.post<Feedback>(API_ENDPOINTS.rateSession, data);
-    return response.data;
+    await api.post(API_ENDPOINTS.rateSession, data);
+    return {
+      id: 0,
+      sessionId: data.sessionId,
+      senderId: 0,
+      senderName: 'You',
+      receiverId: 0,
+      rating: data.rating,
+      comment: data.comment,
+      createdAt: new Date().toISOString(),
+    };
   },
 };

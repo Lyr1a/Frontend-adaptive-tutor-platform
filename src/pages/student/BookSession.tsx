@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Form, Select, DatePicker, TimePicker, InputNumber, Button, Typography, Alert, Result, message } from 'antd';
-import { ArrowLeftOutlined, CalendarOutlined, DollarOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, CalendarOutlined, StarOutlined } from '@ant-design/icons';
 import { tutorService, subjectService, sessionService, creditService } from '../../services';
 import { Loading } from '../../components/common';
 import type { TutorProfile, Subject, BookSessionRequest } from '../../types';
+import { formatCurrency } from '../../utils';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
@@ -43,11 +44,19 @@ const BookSession: React.FC = () => {
         setTutor(tutorData);
         // Filter subjects that tutor teaches
         const tutorSubjectIds = tutorData.subjects.map(s => s.subjectId);
-        setSubjects(subjectsData.filter(s => tutorSubjectIds.includes(s.id) && s.isActive));
+        // The booking API requires subjectId > 0.
+        setSubjects(
+          subjectsData.filter(
+            (subject) =>
+              subject.id > 0 &&
+              tutorSubjectIds.includes(subject.id) &&
+              subject.isActive
+          )
+        );
         setBalance(balanceData);
       } catch (err) {
         console.error('Failed to fetch data:', err);
-        message.error('Không thể tải thông tin');
+        message.error('Unable to load information');
       } finally {
         setLoading(false);
       }
@@ -56,11 +65,10 @@ const BookSession: React.FC = () => {
     fetchData();
   }, [tutorId]);
 
-  const selectedSubjectData = subjects.find(s => s.id === selectedSubject);
   const tutorSubjectRate = tutor?.subjects.find(s => s.subjectId === selectedSubject);
 
   const calculateFee = () => {
-    if (!selectedSubject || !tutorSubjectRate) return 0;
+    if (selectedSubject === null || !tutorSubjectRate) return 0;
     
     const startTime = form.getFieldValue('startTime');
     const endTime = form.getFieldValue('endTime');
@@ -75,22 +83,65 @@ const BookSession: React.FC = () => {
   };
 
   const onFinish = async (values: any) => {
-    if (!tutorId || !selectedSubject) {
-      message.error('Vui lòng chọn đầy đủ thông tin');
+    if (!tutorId || selectedSubject === null) {
+      message.error('Please complete all required information');
       return;
     }
 
-    const startDateTime = dayjs(values.date).hour(dayjs(values.startTime, 'HH:mm').hour()).minute(dayjs(values.startTime, 'HH:mm').minute());
-    const endDateTime = dayjs(values.date).hour(dayjs(values.endTime, 'HH:mm').hour()).minute(dayjs(values.endTime, 'HH:mm').minute());
+    const startDateTime = dayjs(values.date)
+      .hour(values.startTime.hour())
+      .minute(values.startTime.minute())
+      .second(0);
+    const endDateTime = dayjs(values.date)
+      .hour(values.endTime.hour())
+      .minute(values.endTime.minute())
+      .second(0);
 
     if (startDateTime.isSameOrBefore(dayjs())) {
-      message.error('Thời gian bắt đầu phải lớn hơn thời gian hiện tại');
+      message.error('The start time must be in the future');
       return;
     }
 
     if (endDateTime.isSameOrBefore(startDateTime)) {
-      message.error('Thời gian kết thúc phải lớn hơn thời gian bắt đầu');
+      message.error('The end time must be later than the start time');
       return;
+    }
+
+    if (tutor?.freeSchedulesJson) {
+      try {
+        const schedules = JSON.parse(tutor.freeSchedulesJson) as Array<{
+          dayOfWeek: number | string;
+          startHour?: number;
+          endHour?: number;
+          startTime?: string;
+          endTime?: string;
+        }>;
+        const dayOfWeek = startDateTime.day();
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const startHour = startDateTime.hour() + startDateTime.minute() / 60;
+        const endHour = endDateTime.hour() + endDateTime.minute() / 60;
+        const isAvailable = schedules.some(
+          (schedule) =>
+            (
+              schedule.dayOfWeek === dayNames[dayOfWeek] &&
+              startDateTime.format('HH:mm') >= (schedule.startTime ?? '') &&
+              endDateTime.format('HH:mm') <= (schedule.endTime ?? '')
+            ) ||
+            (
+              schedule.dayOfWeek === dayOfWeek &&
+              startHour >= (schedule.startHour ?? 0) &&
+              endHour <= (schedule.endHour ?? 0)
+            )
+        );
+
+        if (!isAvailable) {
+          message.error('The selected time is outside the tutor availability.');
+          return;
+        }
+      } catch {
+        message.error('The tutor availability is invalid.');
+        return;
+      }
     }
 
     setSubmitting(true);
@@ -106,33 +157,25 @@ const BookSession: React.FC = () => {
 
       await sessionService.book(data);
       setSuccess(true);
-      message.success('Đặt lịch thành công!');
+      message.success('Session booked successfully!');
     } catch (err: any) {
       if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
-        setError('Yêu cầu bị timeout. Vui lòng kiểm tra kết nối mạng và thử lại.');
+        setError('The request timed out. Check your network connection and try again.');
       } else if (err.response?.status === 400) {
-        const errorMsg = err.response.data?.message || 'Yêu cầu không hợp lệ';
+        const errorMsg = err.response.data?.message || 'Invalid request';
         if (errorMsg.includes('Credit')) {
-          setError('Số dư không đủ. Vui lòng nạp thêm Credit!');
-        } else if (errorMsg.includes('trùng')) {
-          setError('Lịch bị trùng. Vui lòng chọn thời gian khác.');
+          setError('Insufficient balance. Please add more Learning Credits!');
+        } else if (errorMsg.includes('conflict')) {
+          setError('This time conflicts with another session. Please select a different time.');
         } else {
           setError(errorMsg);
         }
       } else {
-        setError('Đã xảy ra lỗi. Vui lòng thử lại.');
+        setError('Something went wrong. Please try again.');
       }
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-      minimumFractionDigits: 0,
-    }).format(value);
   };
 
   if (loading) {
@@ -144,14 +187,14 @@ const BookSession: React.FC = () => {
       <Card variant="borderless" style={{ borderRadius: 12, textAlign: 'center', padding: 48 }}>
         <Result
           status="success"
-          title="Đặt lịch thành công!"
-          subTitle="Gia sư sẽ được thông báo về yêu cầu của bạn. Vui lòng chờ xác nhận."
+          title="Session booked successfully!"
+          subTitle="The tutor will be notified of your request. Please wait for confirmation."
           extra={[
             <Button type="primary" key="sessions" onClick={() => navigate('/student/sessions')}>
-              Xem lịch học
+              View Sessions
             </Button>,
             <Button key="home" onClick={() => navigate('/student/dashboard')}>
-              Về trang chủ
+              Go to home page
             </Button>,
           ]}
         />
@@ -166,7 +209,7 @@ const BookSession: React.FC = () => {
         onClick={() => navigate(-1)}
         style={{ marginBottom: 16 }}
       >
-        Quay lại
+        Back
       </Button>
 
       <Card 
@@ -174,14 +217,14 @@ const BookSession: React.FC = () => {
         style={{ borderRadius: 12, boxShadow: 'rgba(0, 0, 0, 0.03) 0px 4px 24px' }}
       >
         <Title level={3} style={{ fontWeight: 700, marginBottom: 24 }}>
-          Đặt lịch học với {tutor?.fullName}
+          Book a Session with {tutor?.fullName}
         </Title>
 
         {/* Balance Info */}
         <Alert
           message={
             <span>
-              Số dư Credit của bạn: <strong style={{ color: '#7132f5' }}>{formatCurrency(balance)}</strong>
+              Your Learning Credit Balance: <strong style={{ color: '#7132f5' }}>{formatCurrency(balance)}</strong>
             </span>
           }
           type="info"
@@ -198,6 +241,16 @@ const BookSession: React.FC = () => {
           />
         )}
 
+        {subjects.length === 0 && (
+          <Alert
+            message="There are no subjects available to book with this tutor."
+            description="The tutor subjects do not have valid booking API identifiers."
+            type="warning"
+            showIcon
+            style={{ marginBottom: 24 }}
+          />
+        )}
+
         <Form
           form={form}
           layout="vertical"
@@ -206,12 +259,12 @@ const BookSession: React.FC = () => {
         >
           {/* Subject Selection */}
           <Form.Item
-            label="Môn học"
+            label="Subject"
             name="subjectId"
-            rules={[{ required: true, message: 'Vui lòng chọn môn học!' }]}
+            rules={[{ required: true, message: 'Please select a subject!' }]}
           >
             <Select
-              placeholder="Chọn môn học"
+              placeholder="Select a subject"
               onChange={(value) => setSelectedSubject(value)}
               size="large"
             >
@@ -219,7 +272,7 @@ const BookSession: React.FC = () => {
                 const rate = tutor?.subjects.find(s => s.subjectId === subject.id);
                 return (
                   <Option key={subject.id} value={subject.id}>
-                    {subject.name} - {rate ? formatCurrency(rate.hourlyRate) + '/giờ' : ''}
+                    {subject.name} - {rate ? formatCurrency(rate.hourlyRate) + '/hour' : ''}
                   </Option>
                 );
               })}
@@ -228,51 +281,51 @@ const BookSession: React.FC = () => {
 
           {/* Date Picker */}
           <Form.Item
-            label="Ngày học"
+            label="Session Date"
             name="date"
-            rules={[{ required: true, message: 'Vui lòng chọn ngày!' }]}
+            rules={[{ required: true, message: 'Please select a date!' }]}
           >
             <DatePicker
               style={{ width: '100%' }}
               disabledDate={(current) => current && current < dayjs().startOf('day')}
-              format="DD/MM/YYYY"
-              placeholder="Chọn ngày"
+              format="MMM D, YYYY"
+              placeholder="Select a date"
             />
           </Form.Item>
 
           {/* Time Range */}
-          <div style={{ display: 'flex', gap: 16 }}>
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
             <Form.Item
-              label="Giờ bắt đầu"
+              label="Start Time"
               name="startTime"
-              rules={[{ required: true, message: 'Vui lòng chọn giờ bắt đầu!' }]}
-              style={{ flex: 1 }}
+              rules={[{ required: true, message: 'Please select a start time!' }]}
+              style={{ flex: '1 1 220px' }}
             >
               <TimePicker
                 style={{ width: '100%' }}
                 format="HH:mm"
-                placeholder="Giờ bắt đầu"
+                placeholder="Start Time"
                 minuteStep={30}
               />
             </Form.Item>
 
             <Form.Item
-              label="Giờ kết thúc"
+              label="End Time"
               name="endTime"
-              rules={[{ required: true, message: 'Vui lòng chọn giờ kết thúc!' }]}
-              style={{ flex: 1 }}
+              rules={[{ required: true, message: 'Please select an end time!' }]}
+              style={{ flex: '1 1 220px' }}
             >
               <TimePicker
                 style={{ width: '100%' }}
                 format="HH:mm"
-                placeholder="Giờ kết thúc"
+                placeholder="End Time"
                 minuteStep={30}
               />
             </Form.Item>
           </div>
 
           {/* Fee Preview */}
-          {selectedSubject && (
+          {selectedSubject !== null && (
             <div style={{
               padding: 16,
               backgroundColor: 'rgba(113, 50, 245, 0.04)',
@@ -280,15 +333,15 @@ const BookSession: React.FC = () => {
               marginBottom: 24,
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <DollarOutlined style={{ color: '#7132f5' }} />
-                <Text strong>Phí dự kiến</Text>
+                <StarOutlined style={{ color: '#7132f5' }} />
+                <Text strong>Estimated Cost</Text>
               </div>
               <Title level={3} style={{ color: '#7132f5', margin: 0 }}>
                 {formatCurrency(calculateFee())}
               </Title>
               {calculateFee() > balance && (
                 <Alert 
-                  message="Số dư không đủ để đặt lịch này" 
+                  message="Insufficient balance for this booking"
                   type="warning" 
                   showIcon 
                   style={{ marginTop: 12 }}
@@ -305,9 +358,9 @@ const BookSession: React.FC = () => {
               loading={submitting}
               block
               style={{ height: 52, borderRadius: 12, fontSize: 16, fontWeight: 600 }}
-              disabled={calculateFee() > balance}
+              disabled={subjects.length === 0 || calculateFee() > balance}
             >
-              Xác nhận đặt lịch
+              Confirm Booking
             </Button>
           </Form.Item>
         </Form>
