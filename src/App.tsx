@@ -25,6 +25,7 @@ import BookSession from './pages/student/BookSession';
 import StudentSessions from './pages/student/Sessions';
 import SessionDetail from './pages/student/SessionDetail';
 import Wallet from './pages/student/Wallet';
+import Progress from './pages/student/Progress';
 import Profile from './pages/student/Profile';
 
 // Tutor Pages
@@ -97,7 +98,7 @@ const App: React.FC = () => {
                 <Route path="/student/sessions" element={<StudentSessions />} />
                 <Route path="/student/session/:id" element={<SessionDetail />} />
                 <Route path="/student/wallet" element={<Wallet />} />
-                <Route path="/student/progress" element={<Navigate to="/404" replace />} />
+                <Route path="/student/progress" element={<Progress />} />
                 <Route path="/student/profile" element={<Profile />} />
               </Route>
             </Route>
