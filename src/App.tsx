@@ -46,6 +46,8 @@ import Users from './pages/admin/Users';
 
 // Common Pages
 import HomePage from './pages/HomePage';
+import ChangePasswordPage from './pages/ChangePasswordPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 // Protected Route
 import { ProtectedRoute } from './components/common/ProtectedRoute';
@@ -69,6 +71,7 @@ const App: React.FC = () => {
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<HomePage />} />
+            <Route path="/404" element={<NotFoundPage />} />
             
             {/* Auth Routes */}
             <Route element={<AuthLayout />}>
@@ -76,6 +79,13 @@ const App: React.FC = () => {
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
+            </Route>
+
+            {/* Shared authenticated routes */}
+            <Route element={<ProtectedRoute allowedRoles={['Student', 'Tutor', 'Administrator']} />}>
+              <Route element={<MainLayout />}>
+                <Route path="/change-password" element={<ChangePasswordPage />} />
+              </Route>
             </Route>
 
             {/* Student Routes */}
@@ -118,7 +128,7 @@ const App: React.FC = () => {
             </Route>
 
             {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/404" replace />} />
           </Routes>
         </BrowserRouter>
       </ConfigProvider>
