@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Checkbox, Typography, Alert, Divider, message } from 'antd';
-import { MailOutlined, LockOutlined, GoogleOutlined, GithubOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Checkbox, Typography, Alert, message } from 'antd';
+import { MailOutlined, LockOutlined } from '@ant-design/icons';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../stores';
 import { authService } from '../../services';
 import type { LoginRequest } from '../../types';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Paragraph } = Typography;
 
 interface LoginFormValues extends LoginRequest {
   remember?: boolean;
@@ -149,42 +149,7 @@ const LoginPage: React.FC = () => {
         </Form.Item>
       </Form>
 
-      <Divider style={{ margin: '24px 0' }}>
-        <Text type="secondary" style={{ fontSize: 13 }}>Or continue with</Text>
-      </Divider>
-
-      <div style={{ display: 'flex', gap: 12 }}>
-        <Button
-          icon={<GoogleOutlined />}
-          onClick={() => navigate('/404')}
-          style={{
-            flex: 1,
-            height: 44,
-            borderRadius: 12,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          Google
-        </Button>
-        <Button
-          icon={<GithubOutlined />}
-          onClick={() => navigate('/404')}
-          style={{
-            flex: 1,
-            height: 44,
-            borderRadius: 12,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          GitHub
-        </Button>
-      </div>
-
-      <Paragraph type="secondary" style={{ textAlign: 'center', marginTop: 24, marginBottom: 0 }}>
+      <Paragraph type="secondary" style={{ textAlign: 'center', marginTop: 8, marginBottom: 0 }}>
         Don't have an account?{' '}
         <Link to="/register" style={{ color: '#7132f5', fontWeight: 500 }}>
           Sign up now
